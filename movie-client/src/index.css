@@ -1,68 +1,102 @@
-:root {
-  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
-  line-height: 1.5;
-  font-weight: 400;
+/* ====== Base reset / theme ====== */
+*, *::before, *::after { box-sizing: border-box; }
+html, body, #root { height: 100%; }
+html, body { margin: 0; padding: 0; }
 
-  color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
-
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
-a {
-  font-weight: 500;
-  color: #646cff;
-  text-decoration: inherit;
-}
-a:hover {
-  color: #535bf2;
+:root{
+  --bg: #0b0614;         
+  --bg-soft: #120a20;     /* section background */
+  --text: #f4f4f8;
+  --muted: #a7a7b3;
+  --accent: #8a5cff;     
+  --card-w: 220px;        /* poster width */
+  --card-r: 14px;         /* poster radius */
+  --gap: 20px;            /* spacing between posters */
 }
 
-body {
-  margin: 0;
-  display: flex;
-  place-items: center;
-  min-width: 320px;
-  min-height: 100vh;
+body{
+  background: linear-gradient(180deg, #0b0614 0%, #0b0614 60%, #0a0712 100%);
+  color: var(--text);
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, Inter, Arial, sans-serif;
 }
 
-h1 {
-  font-size: 3.2em;
-  line-height: 1.1;
+/* ====== Page container ====== */
+.app {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 24px 16px 64px;
 }
 
-button {
-  border-radius: 8px;
-  border: 1px solid transparent;
-  padding: 0.6em 1.2em;
-  font-size: 1em;
-  font-weight: 500;
-  font-family: inherit;
-  background-color: #1a1a1a;
-  cursor: pointer;
-  transition: border-color 0.25s;
+/* ====== Section header ====== */
+.section{
+  margin: 28px 0 8px;
 }
-button:hover {
-  border-color: #646cff;
+.section-title{
+  display:flex; align-items:center; gap:10px;
+  font-size: 22px; font-weight: 800; letter-spacing:.2px;
 }
-button:focus,
-button:focus-visible {
-  outline: 4px auto -webkit-focus-ring-color;
+.section-title .chev{
+  font-size: 18px; color: var(--muted);
 }
 
-@media (prefers-color-scheme: light) {
-  :root {
-    color: #213547;
-    background-color: #ffffff;
-  }
-  a:hover {
-    color: #747bff;
-  }
-  button {
-    background-color: #f9f9f9;
-  }
+/* ====== Horizontal row (carousel) ====== */
+.row{
+  position: relative;
+  padding: 12px 0;
+  background: transparent;
 }
+.scroller{
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: var(--card-w);
+  gap: var(--gap);
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scroll-snap-type: x mandatory;
+  padding: 8px 48px; /* room for arrows */
+}
+.scroller::-webkit-scrollbar{ height: 10px; }
+.scroller::-webkit-scrollbar-thumb{ background: #2b2140; border-radius: 999px; }
+.scroller::-webkit-scrollbar-track{ background: transparent; }
+
+/* ====== Card ====== */
+.card{
+  width: var(--card-w);
+  scroll-snap-align: start;
+  text-decoration: none; color: inherit;
+}
+.thumb{
+  width: 100%; aspect-ratio: 2 / 3; display:block;
+  object-fit: cover;
+  border-radius: var(--card-r);
+  box-shadow: 0 10px 24px rgba(0,0,0,.35);
+  transition: transform .22s ease, box-shadow .22s ease, filter .22s ease;
+}
+.card:hover .thumb{
+  transform: translateY(-3px) scale(1.02);
+  box-shadow: 0 16px 36px rgba(0,0,0,.5);
+  filter: saturate(1.05) contrast(1.05);
+}
+.caption{
+  margin-top: 8px;
+  font-size: 14px; font-weight: 650;
+  color: #eaeaf4;
+}
+
+/* ====== Row arrows ====== */
+.arrow{
+  position:absolute; top:50%; transform: translateY(-50%);
+  width: 40px; height: 72px; border: none; cursor: pointer;
+  background: linear-gradient(90deg, rgba(11,6,20,.85), rgba(11,6,20,.0));
+  color: #fff; font-size: 22px;
+  display:flex; align-items:center; justify-content:center;
+  border-radius: 12px;
+  opacity: .9;
+}
+.arrow:hover{ opacity: 1; }
+.arrow.left{ left: 0; border-top-right-radius: 16px; border-bottom-right-radius: 16px; }
+.arrow.right{ right: 0; transform: translateY(-50%) rotate(180deg); border-top-left-radius:16px; border-bottom-left-radius:16px; }
+
+/* ====== Hero spacing ( Swiper) */
+.hero { margin-bottom: 18px; border-radius: 14px; overflow: hidden; }
+

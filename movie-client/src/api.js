@@ -1,19 +1,20 @@
-const BASE = "/api"; // dev uses proxy; prod same domain
+console.log("ALL ENV:", import.meta.env);
+console.log("TOKEN:", import.meta.env.VITE_TMDB_TOKEN);
+const BASE = "https://api.themoviedb.org/3";
+const TOKEN = import.meta.env.VITE_TMDB_TOKEN; // pulls from .env
 
-export async function getTrending() {
-  const r = await fetch(`${BASE}/trending`);
-  if (!r.ok) throw new Error("trending failed");
-  return r.json();
+async function get(path) {
+  const res = await fetch(`${BASE}${path}`, {
+    headers: {
+      accept: "application/json",
+      Authorization: `Bearer ${TOKEN}`, // correct format for v4
+    },
+  });
+  if (!res.ok) throw new Error(`TMDB ${res.status}`);
+  return res.json();
 }
 
-export async function searchMovies(q) {
-  const r = await fetch(`${BASE}/search?q=${encodeURIComponent(q)}`);
-  if (!r.ok) throw new Error("search failed");
-  return r.json();
-}
-
-export async function getMovie(id) {
-  const r = await fetch(`${BASE}/movie/${id}`);
-  if (!r.ok) throw new Error("movie failed");
-  return r.json();
-}
+export const getTrending        = () => get(`/trending/movie/week?language=en-US`);
+export const getMovie           = (id) => get(`/movie/${id}?language=en-US`);
+export const getMovieVideos     = (id) => get(`/movie/${id}/videos?language=en-US`);
+export const getRecommendations = (id) => get(`/movie/${id}/recommendations?language=en-US&page=1`);

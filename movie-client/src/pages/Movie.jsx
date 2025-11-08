@@ -1,54 +1,83 @@
 //Details Page
 
-import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
-import { getMovie } from "../api";
+import { useEffect, useMemo, useState } from "react";
+import { useParams, Link } from "react-router-dom";
+import { getMovie, getMovieVideos, getRecommendations } from "../api";
+import SectionRow from "../components/SectionRow";
+import "../index.css";
 
 export default function Movie() {
   const { id } = useParams();
   const [movie, setMovie] = useState(null);
+  const [videos, setVideos] = useState([]);
+  const [recs, setRecs] = useState([]);
   const [err, setErr] = useState("");
 
   useEffect(() => {
-    setErr("");
-    setMovie(null);
-    getMovie(id).then(setMovie).catch((e) => setErr(e.message));
+    let alive = true;
+    Promise.all([getMovie(id), getMovieVideos(id), getRecommendations(id)])
+      .then(([m, v, r]) => {
+        if (!alive) return;
+        setMovie(m);
+        setVideos(v?.results || []);
+        setRecs(r?.results || []);
+      })
+      .catch(e => setErr(e.message));
+    return () => { alive = false; };
   }, [id]);
 
-  if (err) return <div style={{ padding: 16, color: "crimson" }}>Error: {err}</div>;
-  if (!movie) return <div style={{ padding: 16 }}>Loading…</div>;
+  const trailer = useMemo(
+    () => videos.find(x => x.type === "Trailer" && x.site === "YouTube"),
+    [videos]
+  );
 
-  const bg = movie.backdrop_path ? `https://image.tmdb.org/t/p/original${movie.backdrop_path}` : null;
+  if (err)  return <div style={{ padding: 16, color: "crimson" }}>Error: {err}</div>;
+  if (!movie) return <div style={{ padding: 16, color: "#fff" }}>Loading…</div>;
+
+  const bg = movie.backdrop_path
+    ? `https://image.tmdb.org/t/p/w1280${movie.backdrop_path}`
+    : undefined;
 
   return (
-    <div>
-      {bg && (
-        <div
-          style={{
-            backgroundImage: `url(${bg})`,
-            backgroundSize: "cover",
-            backgroundPosition: "center",
-            height: 320
-          }}
-        />
-      )}
-      <div style={{ padding: 16 }}>
-        <h1 style={{ marginBottom: 8 }}>{movie.title}</h1>
-        <p style={{ opacity: 0.8, maxWidth: 900 }}>{movie.overview}</p>
-        <div style={{ marginTop: 8 }}>
-          {movie.release_date && <span>Release: {movie.release_date} • </span>}
-          {movie.runtime ? <span>Runtime: {movie.runtime} min</span> : null}
-        </div>
-        {movie.credits?.cast?.length ? (
-          <div style={{ marginTop: 16 }}>
-            <strong>Top Cast:</strong>
-            <ul style={{ columns: 2, marginTop: 8 }}>
-              {movie.credits.cast.slice(0, 10).map((c) => (
-                <li key={c.cast_id || c.credit_id}>{c.name} {c.character ? `as ${c.character}` : ""}</li>
-              ))}
-            </ul>
+    <div className="app">
+      {/* Hero banner */}
+      <div style={{
+        borderRadius: 14,
+        overflow: "hidden",
+        background: bg ? `center/cover url(${bg})` : "#1b1329",
+        minHeight: 360,
+        display: "grid",
+        alignItems: "end"
+      }}>
+        <div style={{
+          backdropFilter: "blur(2px)",
+          background: "linear-gradient(180deg,rgba(0,0,0,0) 0, rgba(0,0,0,.65) 60%)",
+          padding: 24
+        }}>
+          <h1 style={{ margin: 0 }}>{movie.title}</h1>
+          <div style={{ opacity: .85, marginTop: 6 }}>
+            {movie.release_date?.slice(0,4)} • {movie.runtime}m • {movie.vote_average?.toFixed(1)}★
           </div>
-        ) : null}
+          <p style={{ maxWidth: 800 }}>{movie.overview}</p>
+          {trailer && (
+            <a
+              href={`https://www.youtube.com/watch?v=${trailer.key}`}
+              target="_blank" rel="noreferrer"
+              style={{ color: "white", fontWeight: 700 }}
+            >
+              ▶ Watch trailer
+            </a>
+          )}
+        </div>
+      </div>
+
+      {/* Recommendations */}
+      {recs.length > 0 && (
+        <SectionRow title="Recommended for you" items={recs} />
+      )}
+
+      <div style={{ marginTop: 24 }}>
+        <Link to="/" style={{ color: "#8a5cff", fontWeight: 700 }}>← Back to Home</Link>
       </div>
     </div>
   );
