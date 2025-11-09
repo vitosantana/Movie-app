@@ -1,7 +1,7 @@
 /* ====== Base reset / theme ====== */
 *, *::before, *::after { box-sizing: border-box; }
 html, body, #root { height: 100%; }
-html, body { margin: 0; padding: 0; }
+html, body, #root { margin: 0; padding: 0; }
 
 :root{
   --bg: #0b0614;         
@@ -99,4 +99,22 @@ body{
 
 /* ====== Hero spacing ( Swiper) */
 .hero { margin-bottom: 18px; border-radius: 14px; overflow: hidden; }
+/* make the hero break out and be edge-to-edge */
+.hero-slider {
+  width: 100vw;
+  height: 100vh;                          /* full viewport width */
+  margin-left: calc(50% - 50vw);         /* break out of centered container */
+  margin-right: calc(50% - 50vw);
+  box-sizing: border-box;
+  overflow: hidden;                      /* hide slide overflow */
+}
+
+/* make each image cover the slide area cleanly */
+.hero-img {
+  width: 100%;
+  height: 100%;           
+  object-fit: cover;
+  display: block;
+}
+
 

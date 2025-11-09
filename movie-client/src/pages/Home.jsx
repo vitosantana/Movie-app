@@ -1,4 +1,3 @@
-// pages/Home.jsx
 import { useEffect, useMemo, useState } from "react";
 import { getTrending } from "../api";
 import HeroSlider from "../components/HeroSlider";
@@ -40,10 +39,13 @@ export default function Home() {
   if (!data) return <div style={{ padding: 16, color: "#fff" }}>Loading…</div>;
 
   return (
+  <>
+    <HeroSlider items={heroItems} />       {/*Makes the carousel stretch vertically at the top of the screen */}
     <div className="app">
-      <HeroSlider items={heroItems} />
       <SectionRow title="Recommended" items={recommended} />
       <SectionRow title="Movie Night"  items={movieNight.length ? movieNight : recommended} />
     </div>
-  );
+  </>
+);
+
 }

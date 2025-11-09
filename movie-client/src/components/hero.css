@@ -1,0 +1,130 @@
+/* HERO (Carousel) overlay styles */
+
+/* slide internal wrapper */
+.hero-slide {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+/* hero image covers entire slide */
+.hero-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* left gradient overlay*/
+.hero-gradient {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: clamp(320px, 35vw, 760px); /* gradient width responsive */
+  background: linear-gradient(
+    90deg,
+    rgba(11,6,20,0.95) 0%,
+    rgba(11,6,20,0.85) 10%,
+    rgba(11,6,20,0.6) 25%,
+    rgba(11,6,20,0.2) 60%,
+    rgba(11,6,20,0) 100%
+  );
+  pointer-events: none;
+  z-index: 10;
+}
+
+/* overlay content container (left side) */
+.hero-overlay {
+  position: absolute;
+  left: 2.5%;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 20;
+  display: flex;
+  align-items: flex-start;
+  width: min(46%, 720px); /* responsive content width */
+  max-width: 720px;
+  padding: clamp(16px, 4vw, 36px);
+  box-sizing: border-box;
+  color: var(--text);
+}
+
+/* inner column to keep the content stacked */
+.hero-inner {
+  max-width: 720px;
+}
+
+/* Title */
+.hero-title {
+  margin: 0 0 12px 0;
+  font-size: clamp(20px, 3.2vw, 48px); /* responsive size */
+  line-height: 1.05;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  color: #fff;
+  text-shadow: 0 6px 18px rgba(0,0,0,0.6);
+}
+
+/* Description */
+.hero-desc {
+  margin: 0 0 18px 0;
+  color: rgba(255,255,255,0.9);
+  font-size: clamp(12px, 1.1vw, 16px);
+  line-height: 1.45;
+  max-width: 65ch;
+}
+
+/* Actions row */
+.hero-actions {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+/* Buttons base */
+.btn {
+  border: none;
+  cursor: pointer;
+  font-weight: 700;
+  padding: 10px 16px;
+  border-radius: 8px;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  transition: transform .12s ease, box-shadow .12s ease, opacity .12s ease;
+}
+
+/* Play button style */
+.btn-play {
+  background: #fff;
+  color: #0b0614;
+  padding: 10px 18px;
+  border-radius: 10px;
+  box-shadow: 0 6px 18px rgba(10,10,10,0.45);
+}
+.btn-play:hover { transform: translateY(-3px); }
+
+/* More info button (secondary) */
+.btn-info {
+  background: rgba(255,255,255,0.12);
+  color: #fff;
+  border: 1px solid rgba(255,255,255,0.12);
+}
+.btn-info:hover { background: rgba(255,255,255,0.16); transform: translateY(-3px); }
+
+/* small screens adjustments */
+@media (max-width: 900px) {
+  .hero-overlay { width: 86%; left: 6%; top: 55%; transform: translateY(-50%); }
+  .hero-title { font-size: clamp(20px, 6.5vw, 32px); }
+  .hero-desc { display: none; } /* hide long text on small screens */
+  .hero-gradient { width: 100vw; opacity: 0.95; }
+  .btn { padding: 9px 12px; font-size: 14px; }
+}
+
+/* focus states for accessibility */
+.btn:focus {
+  outline: 3px solid rgba(138,92,255,0.8);
+  outline-offset: 3px;
+  box-shadow: 0 10px 24px rgba(138,92,255,0.12);
+}
