@@ -1,13 +1,23 @@
+// src/App.jsx
 import { Routes, Route } from "react-router-dom";
+import Navbar from "./components/Navbar";
 import Home from "./pages/Home";
-import Movie from "./pages/Movie";   // ← new page
+import Search from "./pages/Search";
+import Movie from "./pages/Movie";
+// ... other imports
 
 export default function App() {
   return (
-    <Routes>
-      <Route path="/" element={<Home />} />
-      <Route path="/movie/:id" element={<Movie />} />  {/* ← detail route */}
-      {/* <Route path="*" element={<NotFound />} />  // optional */}
-    </Routes>
+    <>
+      <Navbar />
+      <main>
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/search" element={<Search />} />
+          <Route path="/movie/:id" element={<Movie />} />
+          {/* ... other routes */}
+        </Routes>
+      </main>
+    </>
   );
 }

@@ -1,5 +1,4 @@
 //Details Page
-
 import { useEffect, useMemo, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { getMovie, getMovieVideos, getRecommendations } from "../api";

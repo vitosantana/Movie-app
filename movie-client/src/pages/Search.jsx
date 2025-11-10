@@ -1,51 +1,62 @@
-//Search Bar that calls the API
+import { useEffect, useState } from "react";
+import { useSearchParams, useNavigate } from "react-router-dom";
+import { searchMovies } from "../api"; 
+import SectionRow from "../components/SectionRow"; 
 
-import { useState } from "react";
-import { searchMovies } from "../api";
-import { Link } from "react-router-dom";
-
-export default function Search() {
-  const [q, setQ] = useState("");
-  const [data, setData] = useState(null);
-  const [loading, setLoading] = useState(false);
-
-  async function onSearch() {
-    if (!q.trim()) return;
+export default function SearchPage() {
+  const [params] = useSearchParams(); /* reads query parameters from the URL. for an example, If the URL is /search?q=superman, params gives access to "q=superman" */
+  const q = params.get("q") || ""; //Extracts the value of q from the url
+  const [loading, setLoading] = useState(false); // Tells the UI if we're waiting for results from the API
+  const [err, setErr] = useState(""); // Stores an error message if the API fetch failed
+  const [data, setData] = useState(null); // API return results get stored here
+  const navigate = useNavigate(); // ALlows navigating to another route
+/* If no search term stop calling the API */
+  useEffect(() => {
+    if (!q.trim()) {
+      setData(null);
+      setErr("");
+      setLoading(false);
+      return;
+    }
     setLoading(true);
-    try { setData(await searchMovies(q)); }
-    finally { setLoading(false); }
-  }
+    setErr("");
+    let alive = true;
+    /* Calls TMDB API function, stores results in data, if API fails store error in err, when done stop loading indicator */
+    searchMovies(q, 1)
+      .then(res => { if (alive) { setData(res); } })
+      .catch(e => { if (alive) setErr(e.message); })
+      .finally(() => { if (alive) setLoading(false); });
+
+    return () => { alive = false; };
+  }, [q]);
 
   return (
-    <div style={{ padding: 16 }}>
-      <div style={{ display: "flex", gap: 8 }}>
-        <input
-          value={q}
-          onChange={(e) => setQ(e.target.value)}
-          placeholder="Search movies…"
-          style={{ flex: 1, padding: 8 }}
-          onKeyDown={(e) => e.key === "Enter" && onSearch()}
-        />
-        <button onClick={onSearch} disabled={loading || !q.trim()}>
-          {loading ? "Searching…" : "Search"}
-        </button>
-      </div>
+    <main style={{ padding: "24px" }}>
+      <div style={{ maxWidth: 1400, margin: "0 auto" }}>
+        <h2 style={{ margin: "0 0 12px" }}>Search results for <span style={{ color: "#8a5cff" }}>{q || "…"}</span></h2>
 
-      <div style={{ display: "grid", gap: 16, gridTemplateColumns: "repeat(auto-fill, minmax(160px, 1fr))", marginTop: 16 }}>
-        {data?.results?.map((m) => (
-          <Link key={m.id} to={`/movie/${m.id}`} style={{ textDecoration: "none", color: "inherit" }}>
-            {m.poster_path && (
-              <img
-                src={`https://image.tmdb.org/t/p/w500${m.poster_path}`}
-                alt={m.title}
-                loading="lazy"
-                style={{ width: "100%", borderRadius: 8 }}
-              />
-            )}
-            <div style={{ marginTop: 8, fontWeight: 600 }}>{m.title}</div>
-          </Link>
-        ))}
+        {loading && <p>Loading…</p>}
+        {err && <div style={{ color: "crimson" }}>Error: {err}</div>}
+
+        {!loading && !err && data && data.results?.length === 0 && (
+          <div>No results found. Try another search.</div>
+        )}
+
+        {!loading && data && data.results?.length > 0 && (
+          <>
+           
+            <div style={{ marginTop: 16 }}>
+              <SectionRow title={`${data.total_results} Results`} items={data.results} />
+            </div>
+          </>
+        )}
+
+        {!q && (
+          <div style={{ marginTop: 12 }}>
+            <p>Type a movie name in the search (top-right) to find movies.</p>
+          </div>
+        )}
       </div>
-    </div>
+    </main>
   );
 }
