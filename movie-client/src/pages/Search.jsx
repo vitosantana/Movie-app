@@ -9,7 +9,7 @@ export default function SearchPage() {
   const [loading, setLoading] = useState(false); // Tells the UI if we're waiting for results from the API
   const [err, setErr] = useState(""); // Stores an error message if the API fetch failed
   const [data, setData] = useState(null); // API return results get stored here
-  const navigate = useNavigate(); // ALlows navigating to another route
+  const navigate = useNavigate(); // Allows navigating to another route
 /* If no search term stop calling the API */
   useEffect(() => {
     if (!q.trim()) {

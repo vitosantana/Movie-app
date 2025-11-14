@@ -71,13 +71,12 @@ export default function Movie() {
       </div>
 
       {/* Recommendations */}
-      {recs.length > 0 && (
-        <SectionRow title="Recommended for you" items={recs} />
-      )}
-
-      <div style={{ marginTop: 24 }}>
-        <Link to="/" style={{ color: "#8a5cff", fontWeight: 700 }}>← Back to Home</Link>
+        {recs.filter(m => m.backdrop_path).length > 0 && (
+          <SectionRow
+          title="Recommended for you"
+          items={recs.filter(m => m.backdrop_path)}
+          />
+)}
       </div>
-    </div>
   );
 }

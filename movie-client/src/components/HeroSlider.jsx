@@ -4,11 +4,13 @@ import "swiper/css";
 import "swiper/css/pagination";
 import "./hero.css";
 
-export default function HeroSlider({ items = [] }) { /* The = [] is a default so if the parent doesn’t pass items, items will be an empty array and also prevents runtime errors */
+export default function HeroSlider({ items = [],
+    getHref = (m) => `/movie/${m.id}`,
+ }) { /* The = [] is a default so if the parent doesn’t pass items, items will be an empty array and also prevents runtime errors */
   const slides = (items || []).filter(m => !!m?.backdrop_path);
   if (!slides.length) return null;
 
-  // helper to truncate long text
+  // helper to shorten long text
   const truncate = (text = "", n = 160) =>
     text.length > n ? text.slice(0, n - 1).trim() + "…" : text;
 
@@ -43,8 +45,7 @@ export default function HeroSlider({ items = [] }) { /* The = [] is a default so
                     <button
                       className="btn btn-play"
                       onClick={() => {
-                        // integrate play action: navigate to /movie/:id or open player
-                        window.location.href = `/movie/${m.id}`; // replace with router navigation
+                        window.location.href = getHref(m);; // Gives access to Tv Details Page
                       }}
                       aria-label={`Play ${m.title || m.name}`}
                     >
@@ -54,8 +55,8 @@ export default function HeroSlider({ items = [] }) { /* The = [] is a default so
                     <button
                       className="btn btn-info"
                       onClick={() => {
-                        // Navigates to details page
-                        window.location.href = `/movie/${m.id}`; // example
+                        // Navigates to TV Details page
+                        window.location.href = getHref(m);; 
                       }}
                       aria-label={`More information about ${m.title || m.name}`}
                     >

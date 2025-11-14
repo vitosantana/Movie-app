@@ -34,3 +34,46 @@ export async function searchMovies(query = "", page = 1) {
   return get(path);
 }
 
+//  TV: trending
+export function getTrendingTV() {
+  return get("/trending/tv/week?language=en-US");
+}
+
+//  TV: single show details
+export function getTVShow(id) {
+  return get(`/tv/${id}?language=en-US`);
+}
+
+//  TV: search
+export function searchTV(query, page = 1) {
+  return get(
+    `/search/tv?query=${encodeURIComponent(query)}&page=${page}&include_adult=false&language=en-US`
+  );
+}
+
+//  TV: recommendations
+export function getTVRecommendations(id) {
+  return get(`/tv/${id}/recommendations?language=en-US&page=1`);
+}
+
+// TV: trailers
+export function getTVVideos(id) {
+  return get(`/tv/${id}/videos?language=en-US`);
+}
+
+
+// TV: similar shows to a given show
+export function getTVSimilar(id) {
+  return get(`/tv/${id}/similar?language=en-US&page=1`);
+}
+
+// TV: discover shows by genre
+export function discoverTVByGenre(genreId, page = 1) {
+  if (!genreId) {
+    return Promise.resolve({ page: 1, results: [], total_pages: 0, total_results: 0 });
+  }
+  return get(
+    `/discover/tv?language=en-US&sort_by=popularity.desc&with_genres=${genreId}&page=${page}&include_adult=false`
+  );
+}
+
