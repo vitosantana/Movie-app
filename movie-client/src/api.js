@@ -21,6 +21,25 @@ export const getMovie           = (id) => get(`/movie/${id}?language=en-US`);
 export const getMovieVideos     = (id) => get(`/movie/${id}/videos?language=en-US`);
 export const getRecommendations = (id) => get(`/movie/${id}/recommendations?language=en-US&page=1`);
 
+// Movie Images
+export function getMovieImages(id) {
+  return get(`/movie/${id}/images`);
+}
+// movie “similar” endpoint
+export function getMovieSimilar(id) {
+  return get(`/movie/${id}/similar?language=en-US&page=1`);
+}
+
+//movie discover-by-genre
+export function discoverMovieByGenre(genreId, page = 1) {
+  if (!genreId) {
+    return Promise.resolve({ page: 1, results: [], total_pages: 0, total_results: 0 });
+  }
+  return get(
+    `/discover/movie?language=en-US&sort_by=popularity.desc&with_genres=${genreId}&page=${page}&include_adult=false`
+  );
+}
+
 
 // Search movies 
 export async function searchMovies(query = "", page = 1) {
@@ -59,6 +78,11 @@ export function getTVRecommendations(id) {
 // TV: trailers
 export function getTVVideos(id) {
   return get(`/tv/${id}/videos?language=en-US`);
+}
+
+// Tv Images
+export function getTVImages(id) {
+  return get(`/tv/${id}/images`);
 }
 
 

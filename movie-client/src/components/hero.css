@@ -64,6 +64,13 @@
   text-shadow: 0 6px 18px rgba(0,0,0,0.6);
 }
 
+.hero-title-logo {
+  width: 40vw;
+  max-width: 500px;
+  margin-bottom: 12px;
+  display: block;
+  object-fit: contain;
+}
 /* Description */
 .hero-desc {
   margin: 0 0 18px 0;

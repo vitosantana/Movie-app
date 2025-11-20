@@ -5,7 +5,7 @@ import "swiper/css/pagination";
 import "./hero.css";
 
 export default function HeroSlider({ items = [],
-    getHref = (m) => `/movie/${m.id}`,
+    getHref = (m) => `/movie/${m.id}`,  logosById = {},
  }) { /* The = [] is a default so if the parent doesn’t pass items, items will be an empty array and also prevents runtime errors */
   const slides = (items || []).filter(m => !!m?.backdrop_path);
   if (!slides.length) return null;
@@ -36,7 +36,15 @@ export default function HeroSlider({ items = [],
               {/* Overlay container  */}
               <div className="hero-overlay" aria-hidden="false">
                 <div className="hero-inner">
-                  <h2 className="hero-title">{m.title || m.name}</h2>
+                  {logosById[m.id] ? (
+                    <img
+                      src={`https://image.tmdb.org/t/p/w500${logosById[m.id].file_path}`}
+                      alt={m.title || m.name}
+                      className="hero-title-logo"
+                    />
+                  ) : (
+                    <h2 className="hero-title">{m.title || m.name}</h2>
+                  )}
                   {m.overview ? (
                     <p className="hero-desc">{truncate(m.overview, 180)}</p>
                   ) : null}

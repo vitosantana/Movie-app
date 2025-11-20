@@ -6,6 +6,7 @@ import {
   getTVRecommendations,
   getTVSimilar,
   discoverTVByGenre,
+  getTVImages,
 } from "../api";
 import SectionRow from "../components/SectionRow";
 import "../index.css";
@@ -15,6 +16,7 @@ export default function TVDetails() {
 
   const [show, setShow] = useState(null);
   const [videos, setVideos] = useState([]);
+   const [logos, setLogos] = useState([]);
   const [recs, setRecs] = useState([]);       // TMDB recommendations
   const [fallback, setFallback] = useState([]); // similar/genre
   const [err, setErr] = useState("");
@@ -25,6 +27,7 @@ export default function TVDetails() {
     // reset between ID changes
     setShow(null);
     setVideos([]);
+    setLogos([]);
     setRecs([]);
     setFallback([]);
     setErr("");
@@ -32,16 +35,18 @@ export default function TVDetails() {
     async function load() {
       try {
         // basic info, videos, recommendations
-        const [s, v, r] = await Promise.all([
+        const [s, v, r,i] = await Promise.all([
           getTVShow(id),
           getTVVideos(id),
           getTVRecommendations(id),
+           getTVImages(id),
         ]);
 
         if (!alive) return;
 
         setShow(s);
         setVideos(v?.results || []);
+        setLogos(i?.logos || []);
 
         const primaryRecs = (r?.results || []).filter(
           (m) => m.backdrop_path
@@ -60,7 +65,7 @@ export default function TVDetails() {
             (m) => m.backdrop_path && m.id !== s.id
           );
         } catch {
-          // If similar shows have an error we'll try genre
+          // If similar shows have an error try genre
         }
 
         if (!alive) return;
@@ -105,6 +110,12 @@ export default function TVDetails() {
     [videos]
   );
 
+  // Pick best logo if available
+  const logo = useMemo(
+    () => logos.find((l) => l.iso_639_1 === "en") || logos[0] || null,
+    [logos]
+  );
+
   if (err)
     return <div style={{ padding: 16, color: "crimson" }}>Error: {err}</div>;
   if (!show)
@@ -135,7 +146,7 @@ export default function TVDetails() {
           borderRadius: 14,
           overflow: "hidden",
           background: bg ? `center/cover url(${bg})` : "#1b1329",
-          minHeight: 360,
+          minHeight: "100vh",
           display: "grid",
           alignItems: "end",
         }}
@@ -148,12 +159,29 @@ export default function TVDetails() {
             padding: 24,
           }}
         >
-          <h1 style={{ margin: 0 }}>
-            {show.name}
-            {year && ` (${year})`}
-          </h1>
+          
+
+           {/* Logo or text title */}
+          {logo ? (
+            <img
+              src={`https://image.tmdb.org/t/p/w500${logo.file_path}`}
+              alt={show.name}
+              style={{
+                width: "40vw",
+                maxWidth: "500px",
+                marginBottom: 12,
+                display: "block",
+              }}
+            />
+          ) : (
+            <h1 style={{ margin: 0 }}>
+              {show.name}
+              {year && ` (${year})`}
+            </h1>
+          )}
 
           <div style={{ opacity: 0.85, marginTop: 6 }}>
+            {year && `${year} • `}
             {seasons && `${seasons} season${seasons > 1 ? "s" : ""}`}{" "}
             {episodes ? `• ${episodes} episodes` : ""}{" "}
             {runtime ? `• ~${runtime}m` : ""}{" "}
@@ -167,7 +195,7 @@ export default function TVDetails() {
               href={`https://www.youtube.com/watch?v=${trailer.key}`}
               target="_blank"
               rel="noreferrer"
-              style={{ color: "white", fontWeight: 700 }}
+              className="trailer-link"
             >
               ▶ Watch trailer
             </a>
@@ -177,11 +205,15 @@ export default function TVDetails() {
 
       {/* Recommendations / similar / genre fallback */}
       {recItems.length > 0 && (
-        <SectionRow
-          title="Recommended TV shows"
-          items={recItems}
-          mediaType="tv"
-        />
+        <>
+          
+
+          <SectionRow
+            title="Recommended TV shows"
+            items={recItems}
+            getHref={(s) => `/tv/${s.id}`}
+          />
+        </>
       )}
     </div>
   );
