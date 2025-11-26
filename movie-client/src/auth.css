@@ -1,0 +1,94 @@
+.auth-page {
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: radial-gradient(circle at top, #1a1130, #050309);
+  color: #fff;
+}
+
+.auth-card {
+  
+  padding: 32px 40px;
+  border-radius: 16px;
+  width: 100%;
+  max-width: 380px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.auth-card h1 {
+  margin: 0 0 8px 0;
+  font-size: 1.8rem;
+}
+
+.auth-card label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 0.9rem;
+}
+
+.auth-card input {
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid #444;
+  background: #111;
+  color: #fff;
+}
+
+.auth-card input:focus {
+  outline: 2px solid  rgba(255, 142, 249, 0.925);
+  border-color: rgba(255, 142, 249, 0.925);
+}
+
+.auth-btn {
+  margin-top: 8px;
+  padding: 10px 16px;
+  background: #07da12;
+  border-radius: 10px;
+  border: none;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.auth-btn:hover {
+  filter: brightness(0.95);
+}
+
+.auth-error {
+  color: #ff6b6b;
+  font-size: 0.9rem;
+}
+
+
+.forgot-password a {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.85rem;
+  text-decoration: none;
+  transition: color .2s ease, opacity .2s ease;
+  align-content: center;
+}
+
+.forgot-password a:hover {
+  color: #ffdd00;
+  opacity: 0.9;
+}
+
+.auth-switch {
+  margin-top: 8px;
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.6);
+  margin-top: -30px;
+}
+
+.auth-switch a {
+  color: #ffdd00;
+  text-decoration: none;
+}
+
+.auth-switch a:hover {
+  opacity: 0.8;
+}

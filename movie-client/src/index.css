@@ -25,9 +25,15 @@ body{
 .app {
   max-width: 1400px;
   margin: 0 auto;
-  padding: 24px 16px 64px;
+  padding: 24px 16px 64px
+  
    
 }
+
+.search-results-page {
+  padding-top: 120px; /* adjust until the navbar is fully visible */
+}
+
 
 /* ====== Section header ====== */
 .section{

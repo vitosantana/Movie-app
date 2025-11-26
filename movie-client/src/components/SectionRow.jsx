@@ -86,18 +86,21 @@ export default function SectionRow({
         )}
 
         <div className="scroller" ref={ref}>
-          {items.map((m) => (
-            <Link key={m.id} to={getHref(m)} className="card">
-              <img
-                className="thumb"
-                src={`https://image.tmdb.org/t/p/w500${m.poster_path}`}
-                alt={m.title || m.name}
-                loading="lazy"
-              />
-              <div className="caption">{m.title || m.name}</div>
-            </Link>
+          {items
+      .filter((m) => !!m.poster_path) // remove items with no poster
+        .map((m) => (
+        <Link key={m.id} to={getHref(m)} className="card">
+        <img
+          className="thumb"
+          src={`https://image.tmdb.org/t/p/w500${m.poster_path}`}
+          alt={m.title || m.name}
+          loading="lazy"
+        />
+         <div className="caption">{m.title || m.name}</div>
+        </Link>
           ))}
         </div>
+
 
         {/* show right arrow only if we're not at the end */}
         {!atEnd && (

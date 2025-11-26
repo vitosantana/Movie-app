@@ -1,0 +1,29 @@
+# Node dependencies (server + client)
+node_modules/
+movie-client/node_modules/
+movie-server/node_modules/
+
+# Environment variables (NEVER commit these)
+.env
+movie-client/.env
+movie-server/.env
+
+# Build output - do not track
+dist/
+movie-client/dist/
+movie-server/dist/
+build/
+
+# IDE & system files
+.vscode/
+.idea/
+*.log
+logs/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.DS_Store
+Thumbs.db
+
+# Misc
+*.local

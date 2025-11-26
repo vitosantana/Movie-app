@@ -1,7 +1,19 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useContext } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { searchMovies} from "../api"
+import { searchAll} from "../api"
+import { AuthContext } from "../context/AuthContext";
 import "./navbar.css";
+
+
+function getHrefForItem(item) {
+  const type =
+    item.media_type ||
+    (item.first_air_date ? "tv" : "movie"); // fallback if media_type missing
+
+  if (type === "tv") return `/tv/${item.id}`;
+  return `/movie/${item.id}`;
+}
+
 
 export default function Navbar() {
   const [query, setQuery] = useState("");
@@ -9,11 +21,18 @@ export default function Navbar() {
   const [loading, setLoading] = useState(false);
   const [open, setOpen] = useState(false); // whether dropdown is visible
   const [selected, setSelected] = useState(-1); // keyboard index
+  const { user, logout } = useContext(AuthContext);
   const containerRef = useRef(null);
   const timeoutRef = useRef(null);
   const controllerRef = useRef(null);
   const navigate = useNavigate();
     const [isScrolled, setIsScrolled] = useState(false); // Makes Navbar transparent by default
+
+    
+  function handleLogout() {
+    logout();
+    navigate("/");
+  }
 
     useEffect(() => {
   function onScroll() {
@@ -51,7 +70,7 @@ export default function Navbar() {
       setSelected(-1);
 
       // call API on first page
-      searchMovies(q, 1)
+      searchAll(q, 1)
         .then((res) => {
           // sometimes API returns undefined - guard
           const items = (res?.results || [])
@@ -99,12 +118,15 @@ export default function Navbar() {
     setQuery(""); //Clears the search input after submitting
   }
     // Called when the user clicks a suggestion in the autocomplete search dropdown
-    function openMovie(m) {
-    setOpen(false); // Closes dropdown (autocomplete)
-    setSuggestions([]); // Clear suggestion results
-    setQuery(""); // Clears text input
-    navigate(`/movie/${m.id}`); // Takes users to movie details page
-  }
+   function openMovie(item) {
+  setOpen(false);
+  setSuggestions([]);
+  setQuery("");
+
+  const href = getHrefForItem(item);
+  navigate(href);
+}
+
     // Makes the dropdown keyboard navigable
    function onKeyDown(e) {
     if (!open) return; //Ignore keyboard if dropdown is closed
@@ -209,7 +231,7 @@ export default function Navbar() {
                     />
                     <div className="sugg-meta">
                       <div className="sugg-title">{m.title || m.name}</div>
-                      <div className="sugg-sub">{(m.release_date || m.first_air_date || "").slice(0, 4)}</div>
+                      <div className="sugg-sub">{(m.release_date || m.first_air_date || "").slice(0, 4)} {" · "} {m.media_type === "tv" ? "TV" : "Movie"}</div>
                     </div>
                   </li>
                 ))}
@@ -218,10 +240,24 @@ export default function Navbar() {
             )}
           </form>
 
-          <div className="nav-actions">
-            <Link to="/register" className="nav-action">Register</Link>
-            <Link to="/signin" className="nav-action">Sign In</Link>
+         <div className="nav-actions">
+            {user ? (
+              <>
+                <span className="nav-user">
+                  {user.email || user?.email}
+                </span>
+                <button className="nav-action nav-logout" onClick={handleLogout}>
+                  Logout
+                </button>
+              </>
+            ) : (
+              <>
+                <Link to="/register" className="nav-action">Register</Link>
+                <Link to="/login" className="nav-action">Sign In</Link>
+              </>
+            )}
           </div>
+
         </div>
       </div>
     </header>

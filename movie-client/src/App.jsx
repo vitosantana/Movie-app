@@ -7,6 +7,10 @@ import TV from "./pages/TV";
 import TVDetails from "./pages/TVDetails";
 import MovieCategory from "./pages/MovieCategory";
 import TVCategory from "./pages/TvCategory"
+import LoginPage from "./pages/LoginPage";
+import RegisterPage from "./pages/RegisterPage";
+import "./auth.css";
+import ForgotPasswordPage from "./pages/ForgotPasswordPage.jsx";
 
 
                     
@@ -30,7 +34,10 @@ export default function App() {
           <Route path="/movies/category/:slug" element={<MovieCategory />} />
            <Route path="/tv" element={<TV />} />
            <Route path="/tv/category/:slug" element={<TVCategory />} />
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/register" element={<RegisterPage />} />
              <Route path="/tv/:id" element={<TVDetails />} />
+             <Route path="/forgot-password" element={<ForgotPasswordPage />} />
         </Routes>
       </main>
     </>

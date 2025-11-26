@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
-import { searchMovies } from "../api"; 
+import { searchAll } from "../api"; 
 import SectionRow from "../components/SectionRow"; 
 
 export default function SearchPage() {
@@ -22,7 +22,7 @@ export default function SearchPage() {
     setErr("");
     let alive = true;
     /* Calls TMDB API function, stores results in data, if API fails store error in err, when done stop loading indicator */
-    searchMovies(q, 1)
+    searchAll(q, 1)
       .then(res => { if (alive) { setData(res); } })
       .catch(e => { if (alive) setErr(e.message); })
       .finally(() => { if (alive) setLoading(false); });
@@ -31,14 +31,16 @@ export default function SearchPage() {
   }, [q]);
 
   return (
-    <main style={{ padding: "24px" }}>
+    <div className="search-results-page">
       <div style={{ maxWidth: 1400, margin: "0 auto" }}>
-        <h2 style={{ margin: "0 0 12px" }}>Search results for <span style={{ color: "#8a5cff" }}>{q || "…"}</span></h2>
+        <h2 style={{ margin: "0 0 12px" }}>
+          Search results for <span style={{ color: "#8a5cff" }}>{q || "…"}</span>
+        </h2>
 
         {loading && <p>Loading…</p>}
         {err && <div style={{ color: "crimson" }}>Error: {err}</div>}
 
-        {!loading && !err && data && data.results?.length === 0 && (
+        {!loading && !err && data?.results?.length === 0 && (
           <div>No results found. Try another search.</div>
         )}
 
@@ -57,6 +59,6 @@ export default function SearchPage() {
           </div>
         )}
       </div>
-    </main>
+    </div>
   );
 }

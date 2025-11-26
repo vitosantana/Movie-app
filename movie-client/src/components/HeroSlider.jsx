@@ -60,16 +60,7 @@ export default function HeroSlider({ items = [],
                       ▶ Play
                     </button>
 
-                    <button
-                      className="btn btn-info"
-                      onClick={() => {
-                        // Navigates to TV Details page
-                        window.location.href = getHref(m);; 
-                      }}
-                      aria-label={`More information about ${m.title || m.name}`}
-                    >
-                      ℹ More Info
-                    </button>
+                    
                   </div>
                 </div>
               </div>

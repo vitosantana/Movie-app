@@ -53,6 +53,31 @@ export async function searchMovies(query = "", page = 1) {
   return get(path);
 }
 
+// Search movies + TV together
+export async function searchAll(query = "", page = 1) {
+  const q = (query || "").trim();
+  if (!q) {
+    // same shape as TMDB search responses
+    return { page: 1, results: [], total_results: 0, total_pages: 0 };
+  }
+
+  const encoded = encodeURIComponent(q);
+
+  // use the shared `get()` helper (Bearer TOKEN is added automatically)
+  const res = await get(
+    `/search/multi?language=en-US&include_adult=false&query=${encoded}&page=${page}`
+  );
+
+  // keep only movie + tv that actually have posters
+  const filtered = (res.results || []).filter(
+    (item) =>
+      (item.media_type === "movie" || item.media_type === "tv") &&
+      item.poster_path
+  );
+
+  return { ...res, results: filtered };
+}
+
 //  TV: trending
 export function getTrendingTV() {
   return get("/trending/tv/week?language=en-US");
