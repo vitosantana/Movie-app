@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState,  useContext} from "react";
 import { useParams } from "react-router-dom";
 import {
   getTVShow,
@@ -7,7 +7,9 @@ import {
   getTVSimilar,
   discoverTVByGenre,
   getTVImages,
+  addToWatchlist,
 } from "../api";
+import { AuthContext } from "../context/AuthContext";
 import SectionRow from "../components/SectionRow";
 import "../index.css";
 
@@ -16,10 +18,12 @@ export default function TVDetails() {
 
   const [show, setShow] = useState(null);
   const [videos, setVideos] = useState([]);
-   const [logos, setLogos] = useState([]);
+  const [logos, setLogos] = useState([]);
   const [recs, setRecs] = useState([]);       // TMDB recommendations
   const [fallback, setFallback] = useState([]); // similar/genre
   const [err, setErr] = useState("");
+  const { user } = useContext(AuthContext);
+  const [adding, setAdding] = useState(false); // My List button loading state
 
   useEffect(() => {
     let alive = true;
@@ -138,6 +142,30 @@ export default function TVDetails() {
   // choose what to display: recommendations -> fallback -> nothing
   const recItems = recs.length ? recs : fallback;
 
+    async function handleAdd() {
+    if (!user) {
+      alert("You need to sign in to use My List");
+      return;
+    }
+
+    try {
+      setAdding(true);
+      await addToWatchlist({
+        id: show.id,
+        media_type: "tv",            // 👈 IMPORTANT: tv instead of movie
+        title: show.name,            // TMDB uses `name` for TV shows
+        poster_path: show.poster_path,
+      });
+      alert("Added to My List");
+    } catch (e) {
+      console.error(e);
+      alert("Failed to add to My List");
+    } finally {
+      setAdding(false);
+    }
+  }
+
+
   return (
     <div className="app">
       {/* Hero banner */}
@@ -188,18 +216,36 @@ export default function TVDetails() {
             {show.vote_average ? `• ${show.vote_average.toFixed(1)}★` : ""}
           </div>
 
-          <p style={{ maxWidth: 800 }}>{show.overview}</p>
-
-          {trailer && (
-            <a
+          <p>{show.overview}</p>
+          <div style={{ display: "flex", gap: 12, marginTop: 12, flexWrap: "wrap" }}>
+            {trailer && (
+              <a
               href={`https://www.youtube.com/watch?v=${trailer.key}`}
               target="_blank"
               rel="noreferrer"
               className="trailer-link"
-            >
-              ▶ Watch trailer
-            </a>
-          )}
+              >
+               ▶ Watch trailer
+               </a>
+            )}
+            <button
+            type="button"
+            onClick={handleAdd}
+            className="trailer-link"
+            style={{ 
+               backgroundColor: "#ffdd00",
+                color: "#000",
+                border: "none",
+                borderRadius: 999,
+                padding: "8px 18px",
+                fontWeight: 700,
+                cursor: "pointer",
+                }}
+                >
+               {adding ? "Adding…" : "+ My List"}
+                </button>
+                
+          </div>
         </div>
       </div>
 

@@ -11,6 +11,10 @@ import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
 import "./auth.css";
 import ForgotPasswordPage from "./pages/ForgotPasswordPage.jsx";
+import ProfilePage from "./pages/ProfilePage.jsx";
+import PrivateRoute from "./components/PrivateRoute.jsx";
+import MyListPage from "./pages/MyListPage.jsx";
+
 
 
                     
@@ -38,6 +42,23 @@ export default function App() {
             <Route path="/register" element={<RegisterPage />} />
              <Route path="/tv/:id" element={<TVDetails />} />
              <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+             {/* Protected Profile route */}
+             <Route
+             path="/profile"
+             element={
+            <PrivateRoute>
+            <ProfilePage />
+            </PrivateRoute>
+             }
+             />
+             <Route
+             path="/my-list"
+             element={
+              <PrivateRoute>
+                <MyListPage />
+              </PrivateRoute>
+             }
+             />
         </Routes>
       </main>
     </>

@@ -1,7 +1,8 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useContext } from "react";
 import { useParams, Link } from "react-router-dom";
-import { getMovie, getMovieVideos, getRecommendations, getMovieSimilar, discoverMovieByGenre, getMovieImages } from "../api";
+import { getMovie, getMovieVideos, getRecommendations, getMovieSimilar, discoverMovieByGenre, getMovieImages, addToWatchlist } from "../api";
 import SectionRow from "../components/SectionRow";
+import { AuthContext } from "../context/AuthContext";
 import "../index.css";
 
 export default function Movie() {
@@ -12,6 +13,8 @@ export default function Movie() {
    const [fallback, setFallback] = useState([]);
    const [logos, setLogos] = useState([]);
   const [err, setErr] = useState("");
+  const { user } = useContext(AuthContext);
+  const [adding, setAdding] = useState(false); // button loading state
 
   useEffect(() => {
     let alive = true;
@@ -115,6 +118,28 @@ let finalRecs = recItems;
 if (!recs.length && fallback.length) {
   finalRecs = [...fallback].sort(() => Math.random() - 0.5);
 }
+  async function handleAdd() {
+    if (!user) {
+      alert("You need to sign in to use My List");
+      return;
+    }
+
+    try {
+      setAdding(true);
+      await addToWatchlist({
+        id: movie.id,
+        media_type: "movie",
+        title: movie.title,
+        poster_path: movie.poster_path,
+      });
+      alert("Added to My List");
+    } catch (e) {
+      console.error(e);
+      alert("Failed to add to My List");
+    } finally {
+      setAdding(false);
+    }
+  }
 
   return (
      <div className="app">
@@ -151,16 +176,37 @@ if (!recs.length && fallback.length) {
           {movie.release_date?.slice(0,4)} • {movie.runtime}m • {movie.vote_average?.toFixed(1)}★
         </div>
         <p style={{ maxWidth: 800 }}>{movie.overview}</p>
-        {trailer && (
-          <a
-            href={`https://www.youtube.com/watch?v=${trailer.key}`}
-            target="_blank" 
-            rel="noreferrer"
+
+        <div style={{ display: "flex", gap: 12, marginTop: 12, flexWrap: "wrap" }}>
+          {trailer && (
+            <a
+              href={`https://www.youtube.com/watch?v=${trailer.key}`}
+              target="_blank"
+              rel="noreferrer"
+              className="trailer-link"
+            >
+              ▶ Watch trailer
+            </a>
+          )}
+
+          <button
+            type="button"
+            onClick={handleAdd}
             className="trailer-link"
+            style={{
+              backgroundColor: "#ffdd00",
+              color: "#000",
+              border: "none",
+              borderRadius: 999,
+              padding: "8px 18px",
+              fontWeight: 700,
+              cursor: "pointer",
+            }}
           >
-            ▶ Watch trailer
-          </a>
-        )}
+            {adding ? "Adding…" : "+ My List"}
+          </button>
+        </div>
+
       </div>
     </div>
 

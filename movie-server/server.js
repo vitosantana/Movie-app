@@ -6,9 +6,10 @@ const express = require("express");
 const cors = require("cors");
 const morgan = require("morgan");
 const axios = require("axios");
-
 const app = express();
 const PORT = process.env.PORT || 4000;
+const JWT_SECRET = process.env.JWT_SECRET || "dev_secret_change_me";
+const watchlists = {};
 
 console.log("TMDB_API_KEY present?", !!process.env.TMDB_API_KEY);
 console.log(
@@ -23,6 +24,28 @@ app.use(morgan("dev"));
 const TMDB = axios.create({
   baseURL: "https://api.themoviedb.org/3",
 });
+
+
+// Authorization Middleware
+function authMiddleware(req, res, next) {
+  const auth = req.headers.authorization || "";
+  const token = auth.startsWith("Bearer ") ? auth.slice(7) : null;
+
+  if (!token) {
+    return res.status(401).json({ error: "missing_token" });
+  }
+
+  try {
+    const payload = jwt.verify(token, JWT_SECRET);
+    // payload should contain at least user id + email
+    req.user = payload;
+    next();
+  } catch (e) {
+    console.error("auth_error:", e.message);
+    return res.status(401).json({ error: "invalid_token" });
+  }
+}
+
 
 // REGISTER
 app.post("/api/auth/register", async (req, res) => {
@@ -50,7 +73,7 @@ app.post("/api/auth/register", async (req, res) => {
     // create JWT
     const token = jwt.sign(
       { id: newUser.id, email: newUser.email },
-      process.env.JWT_SECRET,
+      JWT_SECRET,
       { expiresIn: "7d" }
     );
 
@@ -85,7 +108,7 @@ app.post("/api/auth/login", async (req, res) => {
 
     const token = jwt.sign(
       { id: user.id, email: user.email },
-      process.env.JWT_SECRET,
+      JWT_SECRET,
       { expiresIn: "7d" }
     );
 
@@ -108,8 +131,15 @@ function requireAuth(req, res, next) {
   if (!token) return res.status(401).json({ error: "missing_token" });
 
   try {
-    const payload = jwt.verify(token, process.env.JWT_SECRET);
-    req.user = payload;
+    const payload = jwt.verify(token, JWT_SECRET);
+     const user = users.find(
+      (u) => u.id === payload.id && u.email === payload.email
+    );
+      if (!user) {
+      return res.status(401).json({ error: "user_not_found" });
+    }
+
+    req.user = user;
     next();
   } catch (err) {
     return res.status(401).json({ error: "invalid_token" });
@@ -191,6 +221,53 @@ app.get("/api/movie/:id", async (req, res) => {
       .status(e?.response?.status || 500)
       .json({ error: "movie_failed" });
   }
+});
+
+/* Watch List Routes */
+
+
+// Get current user's watchlist
+app.get("/api/me/watchlist", authMiddleware, (req, res) => {
+  const userId = req.user.id;
+  const items = watchlists[userId] || [];
+  res.json({ items });
+});
+
+// Add an item to watchlist
+app.post("/api/me/watchlist", authMiddleware, (req, res) => {
+  const userId = req.user.id;
+  const { id, media_type, title, name, poster_path } = req.body;
+
+  if (!id) {
+    return res.status(400).json({ error: "missing_id" });
+  }
+
+  if (!watchlists[userId]) {
+    watchlists[userId] = [];
+  }
+
+  const existing = watchlists[userId].find((x) => x.id === id);
+  if (!existing) {
+    watchlists[userId].push({
+      id,
+      media_type: media_type || "movie",
+      title: title || name || "",
+      poster_path: poster_path || null,
+    });
+  }
+
+  res.json({ items: watchlists[userId] });
+});
+
+// Remove an item from watchlist
+app.delete("/api/me/watchlist/:id", authMiddleware, (req, res) => {
+  const userId = req.user.id;
+  const tmdbId = Number(req.params.id);
+
+  const items = watchlists[userId] || [];
+  watchlists[userId] = items.filter((x) => x.id !== tmdbId);
+
+  res.json({ items: watchlists[userId] });
 });
 
 app.listen(PORT, () => {

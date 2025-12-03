@@ -16,8 +16,34 @@ export function AuthProvider({ children }) {
       setUser(decoded);
     } catch {
       localStorage.removeItem("token");
+    return;
+  }
+
+  // Validate token with backend
+    async function validateToken() {
+      try {
+        const res = await fetch("/api/profile", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        if (!res.ok) {
+          // Token invalid OR backend restarted
+          throw new Error("Invalid token");
+        }
+
+        // Token is valid — no action required
+      } catch (err) {
+        console.warn("Token validation failed:", err.message);
+        logout(); // auto logout
+      }
     }
-  }, []);
+
+    validateToken();
+    // --------------------------------------------
+
+  }, []); // runs once on page load
 
   const logout = () => {
     localStorage.removeItem("token");

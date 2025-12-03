@@ -77,6 +77,43 @@ export async function searchAll(query = "", page = 1) {
 
   return { ...res, results: filtered };
 }
+// Tells backend which user the watchlist belongs to
+function authHeaders() {
+  const token = localStorage.getItem("token");
+  return token ? { Authorization: `Bearer ${token}` } : {};
+}
+
+// Fetches all saved movies for the logged-in user
+export async function getWatchlist() {
+  const res = await fetch("/api/me/watchlist", {
+    headers: authHeaders(),
+  });
+  if (!res.ok) throw new Error("Failed to fetch watchlist");
+  return res.json(); // { items: [...] }
+}
+// Sends movie info to backend to save it
+export async function addToWatchlist(item) {
+  const res = await fetch("/api/me/watchlist", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      ...authHeaders(),
+    },
+    body: JSON.stringify(item),
+  });
+  if (!res.ok) throw new Error("Failed to add to watchlist");
+  return res.json();
+}
+// Tells backend to remove a saved movie
+export async function removeFromWatchlist(id) {
+  const res = await fetch(`/api/me/watchlist/${id}`, {
+    method: "DELETE",
+    headers: authHeaders(),
+  });
+  if (!res.ok) throw new Error("Failed to remove from watchlist");
+  return res.json();
+}
+
 
 //  TV: trending
 export function getTrendingTV() {

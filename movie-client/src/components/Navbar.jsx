@@ -169,6 +169,11 @@ export default function Navbar() {
           <nav className="nav-links">
             <Link to="/movies" className="nav-link">Movies</Link>
             <Link to="/tv" className="nav-link">TV Shows</Link>
+            {user && (
+              <Link to="/my-list" className="nav-link">
+                My List
+              </Link>
+              )}
           </nav>
         </div>
 
@@ -243,9 +248,9 @@ export default function Navbar() {
          <div className="nav-actions">
             {user ? (
               <>
-                <span className="nav-user">
-                  {user.email || user?.email}
-                </span>
+                <Link to="/profile" className="nav-user">
+                 {user.email}
+                </Link>
                 <button className="nav-action nav-logout" onClick={handleLogout}>
                   Logout
                 </button>
