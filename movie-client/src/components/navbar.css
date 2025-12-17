@@ -75,7 +75,7 @@
  
 }
 
-/* LEFT */
+/* Left */
 .nav-left {
   display: flex;
   align-items: center;
@@ -100,8 +100,8 @@
   color: #fff;
   padding: 6px 12px;
   border-radius: 3px;
-  background: rgba(86, 28, 243, 0.55);  /* dark pill behind text */
-  backdrop-filter: blur(4px);       /* subtle glassy effect */
+  background: rgba(86, 28, 243, 0.55);  
+  backdrop-filter: blur(4px);       
   max-width: 220px;
   white-space: nowrap;
   overflow: hidden;

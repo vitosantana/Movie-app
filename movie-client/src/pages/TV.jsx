@@ -42,10 +42,9 @@ export default function TV() {
       });
     };
 
-    // run after this render
+    
     const rafId = requestAnimationFrame(() => {
       resetScroll();
-      // extra safety: run again a bit later in case the browser restores after first paint
       setTimeout(resetScroll, 50);
     });
 
@@ -157,7 +156,7 @@ export default function TV() {
     return result;
   };
 
-  // build de-duplicated TV rows
+  // build TV rows
   const recommendedRow = makeRow(recommended, 20);
   const tvNightRow = makeRow(
     tvNight.length ? tvNight : recommended,

@@ -26,7 +26,7 @@ export default function Navbar() {
   const timeoutRef = useRef(null);
   const controllerRef = useRef(null);
   const navigate = useNavigate();
-    const [isScrolled, setIsScrolled] = useState(false); // Makes Navbar transparent by default
+  const [isScrolled, setIsScrolled] = useState(false); // Makes Navbar transparent by default
 
     
   function handleLogout() {
@@ -50,7 +50,7 @@ export default function Navbar() {
     // clear previous debounce timer
     clearTimeout(timeoutRef.current);
 
-    // if empty query -> clear suggestions and return
+    // if empty query, clear suggestions and return
     const q = (query || "").trim();
     if (!q) {
       setSuggestions([]);
@@ -72,7 +72,6 @@ export default function Navbar() {
       // call API on first page
       searchAll(q, 1)
         .then((res) => {
-          // sometimes API returns undefined - guard
           const items = (res?.results || [])
           .filter(m => m.poster_path) // only keep results with a movie poster
           .slice(0, 5); // top 5
@@ -141,7 +140,7 @@ export default function Navbar() {
       if (selected >= 0 && suggestions[selected]) {
         openMovie(suggestions[selected]);
       } else {
-        // no selection: go to search results
+        // no selection, go to search results
         const q = (query || "").trim();
         if (q) {
           setOpen(false);
@@ -158,7 +157,7 @@ export default function Navbar() {
   return (
     <header className={`nav-root ${isScrolled ? "nav-scrolled" : ""}`}>
       <div className="nav-inner" ref={containerRef}>
-        {/* LEFT: logo + main links */}
+        {/* Left: logo + main links */}
         <div className="nav-left">
           <Link to="/" className="nav-logo">
           <img src="/Ice.png" alt="MovieApp Logo" className="nav-logo-img" />
@@ -177,7 +176,7 @@ export default function Navbar() {
           </nav>
         </div>
 
-        {/* RIGHT: search + actions */}
+        {/* Right: search + actions */}
         <div className="nav-right">
           <form onSubmit={onSubmit} className="nav-search-form" role="search" autoComplete="off">
             <input

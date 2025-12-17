@@ -1,0 +1,61 @@
+.mylist-header {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 32px 16px 20px;
+}
+
+.mylist-title {
+  color: #fff;
+  margin: 0 0 6px;
+  font-size: clamp(50px, 3vw, 36px);
+  font-weight: 700;
+}
+
+.mylist-subtitle {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.75);
+  font-size: 1rem;
+}
+
+.mylist-status {
+  margin-top: 8px;
+  color: rgba(255, 255, 255, 0.82);
+  font-size: 0.92rem;
+}
+
+.mylist-error {
+  color: salmon;
+}
+
+.mylist-empty {
+  color: #aaa;
+}
+
+.mylist-divider {
+  margin-top: 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.14);
+}
+
+
+.mylist-grid {
+  max-width: 1400px;
+  margin: 18px auto;
+  padding: 0 16px 40px;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+  gap: 40px;
+}
+
+
+
+/* Make My List cards use the same width as other cards */
+.mylist-card {
+  width: var(--card-w);
+  text-decoration: none;
+  color: inherit;
+}
+
+/* Center caption under the poster on My List */
+.mylist-card .caption {
+  text-align: center;
+}

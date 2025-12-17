@@ -40,10 +40,8 @@ export default function Home() {
       });
     };
 
-    // run after this render
     const rafId = requestAnimationFrame(() => {
       resetScroll();
-      // extra safety: run again a bit later in case the browser restores after first paint
       setTimeout(resetScroll, 50);
     });
 
@@ -149,7 +147,7 @@ const shuffle = (arr) => {
   return copy;
 };
 
-// build a row with unique movies
+// a row with unique movies
 const usedIds = new Set();
 
 const makeRow = (source, max = 20) => {
@@ -178,7 +176,6 @@ const horrorRow  = makeRow(horror, 20);
 
 
 
-  //  Hook order is stable
   if (err) return <div style={{ padding: 16, color: "crimson" }}>Error: {err}</div>;
   if (!data) return <div style={{ padding: 16, color: "#fff" }}>Loading…</div>;
 

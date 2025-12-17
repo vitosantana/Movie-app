@@ -20,18 +20,29 @@ export default function LoginPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
       });
-
-      const data = await res.json();
       
 
-      if (!res.ok) {
-        setError(data.error || "Failed to sign in");
-        return;
+      let data = null;
+
+      // Try to parse JSON, but don't crash if it's invalid
+      try {
+        const text = await res.text();
+        data = text ? JSON.parse(text) : null;
+      } catch (parseErr) {
+        console.warn("Login response was not valid JSON:", parseErr);
       }
 
+      if (!res.ok) {
+        // Show backend error if present, otherwise show status code
+        const msg =
+          data?.error ||
+          `Login failed (status ${res.status}). Check server console for details.`;
+        setError(msg);
+        return;
+      }
+      
+
       localStorage.setItem("token", data.token);
-      localStorage.setItem("user", JSON.stringify(data.user));
-      setUser(data.user); 
 
       navigate("/");
     } catch (err) {

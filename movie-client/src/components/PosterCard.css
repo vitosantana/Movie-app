@@ -1,0 +1,82 @@
+.poster-card {
+  width: 180px;
+  display: block;
+  text-decoration: none;
+  color: #fff;
+  position: relative;
+}
+
+/* image wrapper */
+.poster-thumb-wrap {
+  position: relative;
+  overflow: hidden;
+  border-radius: 8px;
+}
+
+/* thumbnail */
+.poster-thumb {
+  width: 100%;
+  border-radius: 8px;
+  display: block;
+  transition: transform 0.25s ease, filter 0.25s ease;
+}
+
+/* hover overlay (hidden by default) */
+.poster-hover {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    rgba(0, 0, 0, 0.0) 0%,
+    rgba(0, 0, 0, 0.55) 40%,
+    rgba(0, 0, 0, 0.95) 100%
+  );
+  opacity: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 12px;
+  transition: opacity 0.25s ease;
+}
+
+/* show overlay + animate poster */
+.poster-card:hover .poster-hover {
+  opacity: 1;
+}
+
+.poster-card:hover .poster-thumb {
+  transform: scale(1.05);
+  filter: brightness(0.75);
+}
+
+/* play button */
+.poster-play {
+  width: 58px;
+  height: 58px;
+  border-radius: 50%;
+  border: none;
+  background: white;
+  color: black;
+  font-size: 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+/* remove button */
+.poster-remove {
+  padding: 8px 16px;
+  font-size: 0.85rem;
+  background: rgba(0, 0, 0, 0.7);
+  color: white;
+  border: none;
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+.poster-caption {
+  margin-top: 8px;
+  font-size: 0.9rem;
+}

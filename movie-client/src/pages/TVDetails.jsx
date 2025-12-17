@@ -152,7 +152,7 @@ export default function TVDetails() {
       setAdding(true);
       await addToWatchlist({
         id: show.id,
-        media_type: "tv",            // 👈 IMPORTANT: tv instead of movie
+        media_type: "tv",
         title: show.name,            // TMDB uses `name` for TV shows
         poster_path: show.poster_path,
       });

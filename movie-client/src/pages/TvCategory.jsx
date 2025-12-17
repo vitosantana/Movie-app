@@ -1,7 +1,7 @@
-// src/pages/TVCategory.jsx
 import { useParams, Link } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { getTrendingTV, discoverTVByGenre } from "../api";
+import { getHrefForItem } from "../utils/getHrefForItem";
 import "../index.css";
 import "./TvCategory.css";
 
@@ -116,16 +116,16 @@ export default function TVCategory() {
         {items.map((m) => (
           <Link
             key={m.id}
-            to={`/movie/${m.id}`}
+            to={getHrefForItem(m)}
             className="tv-category-card"
           >
             <img
-              className="tv-category-poster"   // ⬅️ CSS will target this
+              className="tv-category-poster" 
               src={`https://image.tmdb.org/t/p/w500${m.poster_path}`}
-              alt={m.title}
+              alt={m.name || m.title || "TV show"}
             />
             <div className="tv-category-title">
-              {m.title}
+              {m.name|| m.title}
             </div>
           </Link>
         ))}

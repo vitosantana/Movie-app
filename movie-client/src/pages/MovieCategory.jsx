@@ -66,7 +66,7 @@ export default function MovieCategory() {
           return;
         }
 
-        // 🔹 Genre based
+        // Genre based
         const config = GENRE_CONFIG[slug];
         if (!config) {
           setErr("Unknown category");

@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState, useContext } from "react";
 import { useParams, Link } from "react-router-dom";
-import { getMovie, getMovieVideos, getRecommendations, getMovieSimilar, discoverMovieByGenre, getMovieImages, addToWatchlist } from "../api";
+import { getMovie, getMovieVideos, getRecommendations, getMovieSimilar, discoverMovieByGenre, getMovieImages} from "../api";
 import SectionRow from "../components/SectionRow";
 import { AuthContext } from "../context/AuthContext";
 import "../index.css";
@@ -27,7 +27,7 @@ export default function Movie() {
     
     async function load() {
       try {
-        // 1) main movie + videos + recommendations
+        // main movie + videos + recommendations
         const [m, v, r, i] = await Promise.all([
           getMovie(id),
           getMovieVideos(id),
@@ -49,7 +49,7 @@ export default function Movie() {
           return;
         }
 
-        // 2) fallback: similar movies
+        // fallback: similar movies
         let similar = [];
         try {
           const simRes = await getMovieSimilar(id);
@@ -57,7 +57,7 @@ export default function Movie() {
             (x) => x.backdrop_path && x.id !== m.id
           );
         } catch {
-          // ignore; we'll try genre next
+       
         }
 
         if (!alive) return;
@@ -67,7 +67,7 @@ export default function Movie() {
           return;
         }
 
-        // 3) fallback: discover by first genre
+        // fallback: discover by first genre
         const firstGenreId = m?.genres?.[0]?.id;
         if (!firstGenreId) return;
 
@@ -118,28 +118,58 @@ let finalRecs = recItems;
 if (!recs.length && fallback.length) {
   finalRecs = [...fallback].sort(() => Math.random() - 0.5);
 }
-  async function handleAdd() {
-    if (!user) {
-      alert("You need to sign in to use My List");
+ async function handleAdd(e) {
+  e.preventDefault();
+  e.stopPropagation();
+
+  if (!user) {
+    alert("You need to sign in to use My List");
+    return;
+  }
+
+  const token = localStorage.getItem("token");
+  if (!token) {
+    alert("Please sign in again.");
+    return;
+  }
+
+  try {
+    setAdding(true);
+
+    const payload = {
+      id: movie.id,
+      media_type: "movie",
+      title: movie.title,
+      poster_path: movie.poster_path,
+    };
+
+    const res = await fetch("/api/me/watchlist", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(payload),
+    });
+
+    if (!res.ok) {
+      console.error(
+        "add_watchlist_failed (movie page):",
+        await res.json().catch(() => null)
+      );
+      alert("Failed to add to My List");
       return;
     }
 
-    try {
-      setAdding(true);
-      await addToWatchlist({
-        id: movie.id,
-        media_type: "movie",
-        title: movie.title,
-        poster_path: movie.poster_path,
-      });
-      alert("Added to My List");
-    } catch (e) {
-      console.error(e);
-      alert("Failed to add to My List");
-    } finally {
-      setAdding(false);
-    }
+    alert("Added to My List");
+  } catch (err) {
+    console.error("Movie page add error:", err);
+    alert("Failed to add to My List");
+  } finally {
+    setAdding(false);
   }
+}
+
 
   return (
      <div className="app">

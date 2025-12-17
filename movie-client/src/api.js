@@ -63,7 +63,7 @@ export async function searchAll(query = "", page = 1) {
 
   const encoded = encodeURIComponent(q);
 
-  // use the shared `get()` helper (Bearer TOKEN is added automatically)
+  // use the shared gethelper (Bearer TOKEN is added automatically)
   const res = await get(
     `/search/multi?language=en-US&include_adult=false&query=${encoded}&page=${page}`
   );
@@ -80,39 +80,78 @@ export async function searchAll(query = "", page = 1) {
 // Tells backend which user the watchlist belongs to
 function authHeaders() {
   const token = localStorage.getItem("token");
-  return token ? { Authorization: `Bearer ${token}` } : {};
+  return token
+    ? { Authorization: `Bearer ${token}` }
+    : {};
 }
 
-// Fetches all saved movies for the logged-in user
+
 export async function getWatchlist() {
   const res = await fetch("/api/me/watchlist", {
-    headers: authHeaders(),
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      ...authHeaders(),
+    },
   });
-  if (!res.ok) throw new Error("Failed to fetch watchlist");
-  return res.json(); // { items: [...] }
+
+  if (!res.ok) {
+    // read server error text so we can see why it failed
+    const text = await res.text();
+    console.error("getWatchlist server error:", res.status, text);
+    throw new Error("Failed to load watchlist");
+  }
+
+  // server should return an array or items
+  return res.json();
 }
-// Sends movie info to backend to save it
+
+
 export async function addToWatchlist(item) {
+  const payload = {
+    id: item.id,
+    media_type: item.media_type || "movie",
+    title: item.title || item.name || "",
+    poster_path: item.poster_path || null,
+  };
+
   const res = await fetch("/api/me/watchlist", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
       ...authHeaders(),
     },
-    body: JSON.stringify(item),
+    body: JSON.stringify(payload),
   });
-  if (!res.ok) throw new Error("Failed to add to watchlist");
+
+  if (!res.ok) {
+    const text = await res.text();
+    console.error("addToWatchlist server error:", res.status, text);
+    throw new Error("add_watchlist_failed");
+  }
+
   return res.json();
 }
-// Tells backend to remove a saved movie
+
+
 export async function removeFromWatchlist(id) {
   const res = await fetch(`/api/me/watchlist/${id}`, {
     method: "DELETE",
-    headers: authHeaders(),
+    headers: {
+      "Content-Type": "application/json",
+      ...authHeaders(),
+    },
   });
-  if (!res.ok) throw new Error("Failed to remove from watchlist");
+
+  if (!res.ok) {
+    const text = await res.text();
+    console.error("removeFromWatchlist server error:", res.status, text);
+    throw new Error("Failed to remove from watchlist");
+  }
+
   return res.json();
 }
+
 
 
 //  TV: trending

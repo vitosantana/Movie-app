@@ -1,7 +1,7 @@
 require("dotenv").config();
 const bcrypt = require("bcryptjs");
 const jwt = require ("jsonwebtoken")
-const users = []; // [{ id, email, passwordHash }]
+const mongoose = require("mongoose");
 const express = require("express");
 const cors = require("cors");
 const morgan = require("morgan");
@@ -9,7 +9,48 @@ const axios = require("axios");
 const app = express();
 const PORT = process.env.PORT || 4000;
 const JWT_SECRET = process.env.JWT_SECRET || "dev_secret_change_me";
-const watchlists = {};
+console.log("ATLAS_URI value:", process.env.ATLAS_URI);
+
+// Mongo connection
+mongoose
+  .connect("mongodb+srv://D_Huggans314:Burb3rryTr3nch314@Movie-App.jt3dhue.mongodb.net/?appName=Movie-App", {
+    dbName: "Movie-App",
+  })
+  .then(() => console.log("✅ Connected to MongoDB"))
+  .catch((err) => {
+    console.error("❌ MongoDB connection error:", err.message);
+    process.exit(1);
+  });
+
+  //  Mongoose models 
+
+const watchlistItemSchema = new mongoose.Schema(
+  {
+    id: { type: Number, required: true }, // TMDB numeric id
+    media_type: { type: String, enum: ["movie", "tv"], required: true },
+    title: { type: String, required: true },
+    poster_path: { type: String, default: null },
+  },
+  { _id: false }
+);
+
+const userSchema = new mongoose.Schema(
+  {
+    email: {
+      type: String,
+      required: true,
+      unique: true,
+      lowercase: true,
+      trim: true,
+    },
+    passwordHash: { type: String, required: true },
+    watchlist: { type: [watchlistItemSchema], default: [] },
+  },
+  { timestamps: true }
+);
+
+const User = mongoose.model("User", userSchema);
+
 
 console.log("TMDB_API_KEY present?", !!process.env.TMDB_API_KEY);
 console.log(
@@ -25,28 +66,6 @@ const TMDB = axios.create({
   baseURL: "https://api.themoviedb.org/3",
 });
 
-
-// Authorization Middleware
-function authMiddleware(req, res, next) {
-  const auth = req.headers.authorization || "";
-  const token = auth.startsWith("Bearer ") ? auth.slice(7) : null;
-
-  if (!token) {
-    return res.status(401).json({ error: "missing_token" });
-  }
-
-  try {
-    const payload = jwt.verify(token, JWT_SECRET);
-    // payload should contain at least user id + email
-    req.user = payload;
-    next();
-  } catch (e) {
-    console.error("auth_error:", e.message);
-    return res.status(401).json({ error: "invalid_token" });
-  }
-}
-
-
 // REGISTER
 app.post("/api/auth/register", async (req, res) => {
   try {
@@ -56,29 +75,29 @@ app.post("/api/auth/register", async (req, res) => {
       return res.status(400).json({ error: "Email and password are required" });
     }
 
+    const normalizedEmail = email.toLowerCase();
+
     // check if user already exists
-    const existing = users.find(u => u.email === email.toLowerCase());
+    const existing = await User.findOne({ email: normalizedEmail });
     if (existing) {
       return res.status(409).json({ error: "Email is already registered" });
     }
 
     const passwordHash = await bcrypt.hash(password, 10);
-    const newUser = {
-      id: users.length + 1,
-      email: email.toLowerCase(),
+    const newUser = await User.create ({
+      email: normalizedEmail,
       passwordHash,
-    };
-    users.push(newUser);
+    });
 
     // create JWT
     const token = jwt.sign(
-      { id: newUser.id, email: newUser.email },
+      { id: newUser._id.toString(), email: newUser.email },
       JWT_SECRET,
       { expiresIn: "7d" }
     );
 
     res.status(201).json({
-      user: { id: newUser.id, email: newUser.email },
+      user: { id: newUser._id.toString(), email: newUser.email },
       token,
     });
   } catch (err) {
@@ -95,25 +114,26 @@ app.post("/api/auth/login", async (req, res) => {
     if (!email || !password) {
       return res.status(400).json({ error: "Email and password are required" });
     }
+    const normalizedEmail = email.toLowerCase();
 
-    const user = users.find(u => u.email === email.toLowerCase());
+
+    const user = await User.findOne({ email: normalizedEmail });
     if (!user) {
       return res.status(401).json({ error: "Invalid email or password" });
     }
-
     const ok = await bcrypt.compare(password, user.passwordHash);
     if (!ok) {
       return res.status(401).json({ error: "Invalid email or password" });
     }
 
     const token = jwt.sign(
-      { id: user.id, email: user.email },
+      { id: user._id.toString(), email: user.email },
       JWT_SECRET,
       { expiresIn: "7d" }
     );
 
     res.json({
-      user: { id: user.id, email: user.email },
+     user: { id: user._id.toString(), email: user.email },
       token,
     });
   } catch (err) {
@@ -124,17 +144,18 @@ app.post("/api/auth/login", async (req, res) => {
 
 //Protects Backend Routes
 
-function requireAuth(req, res, next) {
+async function requireAuth(req, res, next) {
   const authHeader = req.headers.authorization || "";
   const token = authHeader.replace("Bearer ", "");
 
-  if (!token) return res.status(401).json({ error: "missing_token" });
+
+  if (!token) {
+    return res.status(401).json({ error: "missing_token" });
+  }
 
   try {
     const payload = jwt.verify(token, JWT_SECRET);
-     const user = users.find(
-      (u) => u.id === payload.id && u.email === payload.email
-    );
+     const user = await User.findById(payload.id);
       if (!user) {
       return res.status(401).json({ error: "user_not_found" });
     }
@@ -148,7 +169,14 @@ function requireAuth(req, res, next) {
 
 // example protected route
 app.get("/api/profile", requireAuth, (req, res) => {
-  res.json({ message: "Secure data", user: req.user });
+  res.json({
+    message: "Secure data",
+    user: {
+      id: req.user._id.toString(),
+      email: req.user.email,
+      watchlistCount: req.user.watchlist.length,
+    },
+  });
 });
 // Health
 app.get("/api/health", (_req, res) => res.json({ ok: true }));
@@ -227,49 +255,62 @@ app.get("/api/movie/:id", async (req, res) => {
 
 
 // Get current user's watchlist
-app.get("/api/me/watchlist", authMiddleware, (req, res) => {
-  const userId = req.user.id;
-  const items = watchlists[userId] || [];
-  res.json({ items });
+app.get("/api/me/watchlist", requireAuth, async (req, res) => {
+  try {
+    const user = req.user;
+    res.json({ items: user.watchlist });
+  } catch (err) {
+    console.error("get_watchlist_failed:", err);
+    res.status(500).json({ error: "get_watchlist_failed" });
+  }
 });
 
+
 // Add an item to watchlist
-app.post("/api/me/watchlist", authMiddleware, (req, res) => {
-  const userId = req.user.id;
-  const { id, media_type, title, name, poster_path } = req.body;
+app.post("/api/me/watchlist", requireAuth, async (req, res) => {
+  try {
+    const user = req.user;
+    const { id, media_type, title, name, poster_path } = req.body;
 
-  if (!id) {
-    return res.status(400).json({ error: "missing_id" });
+    if (!id) {
+      return res.status(400).json({ error: "missing_id" });
+    }
+
+    const existing = user.watchlist.find((x) => x.id === id);
+    if (!existing) {
+      user.watchlist.push({
+        id,
+        media_type: media_type || "movie",
+        title: title || name || "",
+        poster_path: poster_path || null,
+      });
+      await user.save();
+    }
+
+    res.json({ items: user.watchlist });
+  } catch (err) {
+    console.error("add_watchlist_failed:", err);
+    res.status(500).json({ error: "add_watchlist_failed" });
   }
-
-  if (!watchlists[userId]) {
-    watchlists[userId] = [];
-  }
-
-  const existing = watchlists[userId].find((x) => x.id === id);
-  if (!existing) {
-    watchlists[userId].push({
-      id,
-      media_type: media_type || "movie",
-      title: title || name || "",
-      poster_path: poster_path || null,
-    });
-  }
-
-  res.json({ items: watchlists[userId] });
 });
 
 // Remove an item from watchlist
-app.delete("/api/me/watchlist/:id", authMiddleware, (req, res) => {
-  const userId = req.user.id;
-  const tmdbId = Number(req.params.id);
+app.delete("/api/me/watchlist/:id", requireAuth, async (req, res) => {
+  try {
+    const user = req.user;
+    const tmdbId = Number(req.params.id);
 
-  const items = watchlists[userId] || [];
-  watchlists[userId] = items.filter((x) => x.id !== tmdbId);
+    user.watchlist = user.watchlist.filter((x) => x.id !== tmdbId);
+    await user.save();
 
-  res.json({ items: watchlists[userId] });
+    res.json({ items: user.watchlist });
+  } catch (err) {
+    console.error("remove_watchlist_failed:", err);
+    res.status(500).json({ error: "remove_watchlist_failed" });
+  }
 });
 
+// Start the server
 app.listen(PORT, () => {
   console.log(`API running on http://localhost:${PORT}`);
-});
+})
