@@ -48,6 +48,7 @@
   margin-top: 8px;
   padding: 10px 16px;
   background: #07da12;
+  margin-bottom: 6px;
   border-radius: 10px;
   border: none;
   font-weight: 700;
@@ -78,15 +79,20 @@
 }
 
 .auth-switch {
-  margin-top: 8px;
   font-size: 0.85rem;
   color: rgba(255, 255, 255, 0.6);
-  margin-top: -30px;
+  margin-top: 1px;
+}
+
+.forgot-page,
+.auth-switch {
+  margin-top: -7px;
 }
 
 .auth-switch a {
   color: #ffdd00;
   text-decoration: none;
+  margin-top: 8px;
 }
 
 .auth-switch a:hover {

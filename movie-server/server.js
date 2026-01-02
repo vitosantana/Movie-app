@@ -6,6 +6,7 @@ const express = require("express");
 const cors = require("cors");
 const morgan = require("morgan");
 const axios = require("axios");
+const crypto = require("crypto")
 const app = express();
 const PORT = process.env.PORT || 4000;
 const JWT_SECRET = process.env.JWT_SECRET || "dev_secret_change_me";
@@ -45,6 +46,8 @@ const userSchema = new mongoose.Schema(
     },
     passwordHash: { type: String, required: true },
     watchlist: { type: [watchlistItemSchema], default: [] },
+    resetTokenHash: {type: String, default: null},
+    resetTokenExp: {type: Date, default: null},
   },
   { timestamps: true }
 );
@@ -142,6 +145,80 @@ app.post("/api/auth/login", async (req, res) => {
   }
 });
 
+//Forgot Password
+
+app.post("/api/auth/forgot-password", async (req, res) => {
+  const {email} = req.body;
+  
+  //Alaways return ok (prevents email enumeration)
+  const ok = () => res.json({ ok: true});
+
+  if (!email) return ok();
+  const normalizedEmail = email.toLowerCase();
+  const user = await User.findOne({ email: normalizedEmail });
+  if (!user) return ok();
+  
+  const token = crypto.randomBytes(32).toString("hex");
+  const tokenHash = crypto.createHash("sha256").update(token).digest("hex");
+  
+  user.resetTokenHash = tokenHash;
+  user.resetTokenExp = new Date(Date.now() + 1000 * 60 * 30); // 30 mins
+  await user.save();
+
+  const verify = await User.findById(user._id).select("resetTokenHash resetTokenExp");
+console.log("VERIFY saved resetTokenHash:", verify.resetTokenHash);
+console.log("VERIFY saved resetTokenExp:", verify.resetTokenExp);
+
+  const link = `${process.env.FRONTEND_URL}/reset-password?token=${token}`;
+  
+  //Dev: log link instead of emailing (temporarily for testing)
+  console.log("Password reset link:", link);
+
+  return ok();
+});
+
+//Reset Password
+
+app.post("/api/auth/reset-password", async (req, res) => {
+  try {
+    const { token, password } = req.body;
+
+    if (!token || !password || password.length < 8) {
+      return res.status(400).json({ error: "Invalid request."});
+    }
+    const cleanToken = String(token).trim();
+    const tokenHash = crypto.createHash("sha256").update(cleanToken).digest("hex");
+    // Find By hash only
+    const user = await User.findOne({ resetTokenHash: tokenHash });
+    console.log("Now:", new Date().toISOString());
+    console.log("USER exp:", user?.resetTokenExp?.toISOString?.() || user?.resetTokenExp);
+
+
+    if (!user) {
+      return res.status(400).json({ error: "Token expired or invalid." });
+    }
+
+    //Expiration check in JS to avoide Mongo type confusion
+    if (!user.resetTokenExp || user.resetTokenExp.getTime() <= Date.now()) {
+      return res.status(400).json({ errror: "Token expired or invalid." });
+    }
+
+    //Update password
+    user.passwordHash = await bcrypt.hash(password, 10);
+
+    // Clear reset fields
+    user.resetTokenHash = null;
+    user.resetTokenExp = null;
+
+    await user.save();
+
+    return res.json({ ok: true });
+  } catch (err) {
+  console.error("reset_password_failed:", err);
+  return res.status(500).json({ error: "reset_password_failed" });
+  }
+
+});
 //Protects Backend Routes
 
 async function requireAuth(req, res, next) {

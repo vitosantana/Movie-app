@@ -1,6 +1,6 @@
 import { useRef, useState, useEffect, useContext } from "react";
 import { Link } from "react-router-dom";
-import { getHrefForItem } from "../utils/getHrefForItem";
+import { getHrefForItem } from "../Utils/getHrefForItem";
 import { AuthContext } from "../context/AuthContext";
 import { addToWatchlist, removeFromWatchlist } from "../api";
 

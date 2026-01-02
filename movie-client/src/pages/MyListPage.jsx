@@ -4,7 +4,7 @@ import { AuthContext } from "../context/AuthContext";
 import { getWatchlist } from "../api";
 import "../index.css";
 import "./MyListPage.css"; 
-import { getHrefForItem } from "../utils/getHrefForItem";
+import { getHrefForItem } from "../Utils/getHrefForItem";
 import { removeFromWatchlist } from "../api";
 
 

@@ -14,6 +14,7 @@ import ForgotPasswordPage from "./pages/ForgotPasswordPage.jsx";
 import ProfilePage from "./pages/ProfilePage.jsx";
 import PrivateRoute from "./components/PrivateRoute.jsx";
 import MyListPage from "./pages/MyListPage.jsx";
+import ResetPasswordPage from "./pages/ResetPasswordPage.jsx";
 
 
 
@@ -42,6 +43,7 @@ export default function App() {
             <Route path="/register" element={<RegisterPage />} />
              <Route path="/tv/:id" element={<TVDetails />} />
              <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+             <Route path="/reset-password" element={<ResetPasswordPage />} />
              {/* Protected Profile route */}
              <Route
              path="/profile"

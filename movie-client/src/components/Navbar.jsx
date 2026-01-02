@@ -160,7 +160,7 @@ export default function Navbar() {
         {/* Left: logo + main links */}
         <div className="nav-left">
           <Link to="/" className="nav-logo">
-          <img src="/Ice.png" alt="MovieApp Logo" className="nav-logo-img" />
+          <img src="/favicon.png" alt="MovieApp Logo" className="nav-logo-img" />
           <span className="nav-logo-text">Chrystal Clear</span>
           </Link>
 
