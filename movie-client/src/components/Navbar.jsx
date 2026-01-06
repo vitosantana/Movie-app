@@ -27,7 +27,13 @@ export default function Navbar() {
   const controllerRef = useRef(null);
   const navigate = useNavigate();
   const [isScrolled, setIsScrolled] = useState(false); // Makes Navbar transparent by default
+  const [mobileMenu, setMobileMenu] = useState(false);
+  const [mobileSearch, setMobileSearch] = useState(false);
 
+  function closeOverlays() {
+    setMobileMenu(false);
+    setMobileSearch(false);
+  }
     
   function handleLogout() {
     logout();
@@ -97,16 +103,20 @@ export default function Navbar() {
 
   // close on outside click
   useEffect(() => {
-    function onDocClick(e) {
-      if (!containerRef.current) return;
-      if (!containerRef.current.contains(e.target)) {
-        setOpen(false);
-        setSelected(-1);
-      }
+  function onDocClick(e) {
+    if (!containerRef.current) return;
+
+    if (!containerRef.current.contains(e.target)) {
+      setOpen(false);
+      setSelected(-1);
+      setMobileMenu(false);
+      setMobileSearch(false);
     }
-    document.addEventListener("click", onDocClick);
-    return () => document.removeEventListener("click", onDocClick);
-  }, []);
+  }
+
+  document.addEventListener("click", onDocClick);
+  return () => document.removeEventListener("click", onDocClick);
+}, []);
 
   function onSubmit(e) {/* Function that handles form submission */
     e.preventDefault(); // Prevents the page from reloading
@@ -115,13 +125,14 @@ export default function Navbar() {
     // navigate to a Search route -- implement Search page to read ?q=
     navigate(`/search?q=${encodeURIComponent(q)}`);
     setQuery(""); //Clears the search input after submitting
+    closeOverlays();
   }
     // Called when the user clicks a suggestion in the autocomplete search dropdown
    function openMovie(item) {
   setOpen(false);
   setSuggestions([]);
   setQuery("");
-
+  closeOverlays();
   const href = getHrefForItem(item);
   navigate(href);
 }
@@ -159,26 +170,36 @@ export default function Navbar() {
       <div className="nav-inner" ref={containerRef}>
         {/* Left: logo + main links */}
         <div className="nav-left">
+           {/* Mobile Hamburger Logo (mobile visibility only) */}
+          <button
+          type="button"
+          className="nav-icon-btn nav-hamburger-icon"
+          aria-label="Open menu"
+          onClick={() => {
+            setMobileMenu((v) => !v);
+            setMobileSearch(false);
+          }}
+          >
+            ☰
+          </button>
           <Link to="/" className="nav-logo">
           <img src="/favicon.png" alt="MovieApp Logo" className="nav-logo-img" />
           <span className="nav-logo-text">Chrystal Clear</span>
           </Link>
-
-
-          <nav className="nav-links">
+         
+          {/* Desktop links (Movies, Tv Shows, My List, Desktop visibility only) */}
+          <nav className="nav-links nav-links-desktop">
             <Link to="/movies" className="nav-link">Movies</Link>
             <Link to="/tv" className="nav-link">TV Shows</Link>
-            {user && (
-              <Link to="/my-list" className="nav-link">
-                My List
-              </Link>
-              )}
+            {user && <Link to="/my-list" className="nav-link">My List</Link>}
           </nav>
+          
+
         </div>
 
-        {/* Right: search + actions */}
+        {/* Desktop Search input (Desktop visibility only) */}
         <div className="nav-right">
-          <form onSubmit={onSubmit} className="nav-search-form" role="search" autoComplete="off">
+          <form onSubmit={onSubmit} className="nav-search-form nav-search-desktop" role="search" autoComplete="off">
             <input
               className="nav-search-input"
               placeholder="Find movies, TV shows and more"
@@ -211,40 +232,106 @@ export default function Navbar() {
 
             {/* suggestions dropdown */}
             {open && (
-              <ul className="suggestions" role="listbox" aria-activedescendant={selected >= 0 ? `sugg-${selected}` : undefined}>
+              <ul className="suggestions" role="listbox" aria-activedescendant={selected >= 0 ? `sugg-${selected}` : undefined}
+              >
                 {loading && <li className="suggestion suggestion-loading">Loading…</li>}
-                {!loading && suggestions.map((m, i) => (
-                  <li
-                    key={m.id}
-                    id={`sugg-${i}`}
-                    role="option"
-                    aria-selected={selected === i}
-                    className={`suggestion ${selected === i ? "selected" : ""}`}
-                    onMouseDown={(ev) => {
-                      // mouseDown (not click) so input doesn't lose focus before navigate
-                      ev.preventDefault();
-                      openMovie(m);
-                    }}
-                    onMouseEnter={() => setSelected(i)}
-                  >
-                    <img
-                      src={m.poster_path ? `https://image.tmdb.org/t/p/w92${m.poster_path}` : "/placeholder-92.png"}
-                      alt=""
-                      className="sugg-thumb"
-                      aria-hidden="true"
-                    />
-                    <div className="sugg-meta">
-                      <div className="sugg-title">{m.title || m.name}</div>
-                      <div className="sugg-sub">{(m.release_date || m.first_air_date || "").slice(0, 4)} {" · "} {m.media_type === "tv" ? "TV" : "Movie"}</div>
-                    </div>
-                  </li>
-                ))}
-                {!loading && suggestions.length === 0 && <li className="suggestion">No results</li>}
-              </ul>
+
+    {!loading &&
+      suggestions.map((m, i) => (
+        <li
+          key={`${m.media_type || "movie"}-${m.id}`}
+          id={`sugg-${i}`}
+          role="option"
+          aria-selected={selected === i}
+          className={`suggestion ${selected === i ? "selected" : ""}`}
+          onMouseDown={(ev) => {
+            ev.preventDefault();
+            openMovie(m);
+          }}
+          onMouseEnter={() => setSelected(i)}
+        >
+          <img
+            src={
+              m.poster_path
+                ? `https://image.tmdb.org/t/p/w92${m.poster_path}`
+                : "/placeholder-92.png"
+            }
+            alt=""
+            className="sugg-thumb"
+            aria-hidden="true"
+          />
+          <div className="sugg-meta">
+            <div className="sugg-title">{m.title || m.name}</div>
+            <div className="sugg-sub">
+              {(m.release_date || m.first_air_date || "").slice(0, 4)} {" · "}
+              {m.media_type === "tv" ? "TV" : "Movie"}
+            </div>
+          </div>
+        </li>
+      ))}
+
+    {!loading && suggestions.length === 0 && (
+      <li className="suggestion">No results</li>
+    )}
+                </ul>
             )}
           </form>
 
-         <div className="nav-actions">
+          {/*Mobile Search Icon */}
+
+          <button
+          className="nav-icon-btn nav-search-mobile-btn"
+          type="button"
+          aria-label="Open search"
+          onClick={() => {
+            setMobileSearch((v) => !v);
+            setMobileMenu(false);
+          }}
+          >
+            <svg
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            strokeWidth="1.5"
+            stroke="currentColor"
+            width="18"
+            height="18"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"
+            />
+          </svg>
+          </button>
+
+          {/* Mobile Search Input (only visible when mobileSearch is true) */}
+          {mobileSearch && (
+            <form
+              onSubmit={onSubmit}
+              className="nav-search-form nav-search-mobile"
+              role="search"
+              autoComplete="off"
+              >
+              <input
+              className="nav-search-input"
+              autoFocus
+              placeholder="Search…"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              onKeyDown={onKeyDown}
+              
+              />
+              <button className="nav-search-btn" type="submit" aria-label="Search">
+                {/* same svg */}
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" width="18" height="18">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
+                </svg>
+              </button>
+            </form>
+          )}
+
+         <div className="nav-actions nav-actions-auth">
             {user ? (
               <>
                 <Link to="/profile" className="nav-user">
@@ -257,13 +344,43 @@ export default function Navbar() {
             ) : (
               <>
                 <Link to="/register" className="nav-action">Register</Link>
-                <Link to="/login" className="nav-action">Sign In</Link>
+                <Link to="/login" className="nav-action nav-auth-link">Sign In</Link>
               </>
             )}
           </div>
 
         </div>
       </div>
+
+      {/* Backdrop (click to close) */}
+{mobileMenu && (
+  <div
+    className="nav-backdrop"
+    onClick={closeOverlays}
+    aria-hidden="true"
+  />
+)}
+
+{/* Mobile Drawer */}
+<aside className={`nav-drawer ${mobileMenu ? "open" : ""}`} aria-hidden={!mobileMenu}>
+  <div className="nav-drawer-top">
+    <button
+      type="button"
+      className="nav-drawer-close"
+      aria-label="Close menu"
+      onClick={() => setMobileMenu(false)}
+    >
+      ✕
+    </button>
+  </div>
+
+  <nav className="nav-drawer-links">
+    <Link to="/movies" onClick={closeOverlays}>Movies</Link>
+    <Link to="/tv" onClick={closeOverlays}>TV Shows</Link>
+    {user && <Link to="/my-list" onClick={closeOverlays}>My List</Link>}
+  </nav>
+</aside>
+
     </header>
   );
 }

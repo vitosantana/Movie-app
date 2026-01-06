@@ -69,6 +69,7 @@ body{
   padding: 12px 0;
   background: transparent;
 }
+
 .scroller{
   display: grid;
   grid-auto-flow: column;
@@ -286,3 +287,75 @@ position: absolute;
   transform: translateY(-1px);
 }
 
+@media (max-width: 600px) {
+  :root {
+    --card-w: 150px;
+    --gap: 12px;
+  }
+
+  .app {
+    padding: 16px 12px 48px;
+  }
+
+  html, body {
+    overflow-x: hidden;
+  }
+
+  img {
+    max-width: 100%;
+    height: auto;
+}
+.caption {
+  text-align: center;
+  width: 100%;
+}
+
+
+.arrow {
+  display:none;
+}
+
+.watchlistn-btn {
+  font-size: 13px;
+  padding: 10px 14px;
+}
+
+.card-hover-play {
+  width: 52px;
+  height: 52px;
+}
+}
+
+@media (max-width: 600px) {
+  .navbar {
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .navbar input {
+    width: 100%;
+  }
+}
+
+
+@media (min-width: 600px) {
+  .scroller {
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: var(--card-w);
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .card {
+    width: var(--card-w);
+    flex: 0 0 auto;
+  }
+}
+
+@media (max-width: 768px) {
+  input, textarea, select {
+    font-size: 16px;
+  }
+}

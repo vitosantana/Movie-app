@@ -20,7 +20,7 @@
 
 .movie-category-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(244px, 1fr)); /* Tubi-ish */
+  grid-template-columns: repeat(auto-fill, minmax(244px, 1fr));
   gap: 24px;
   padding-bottom: 40px;
 }
@@ -31,13 +31,10 @@
 }
 
 .movie-category-poster {
-  width: 244px;    
-  height: 366px;
+  width: 100%;
+  aspect-ratio: 2 / 3;
   object-fit: cover;
-  border-radius: 14px;
-  display: block;
-  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.4);
-  transition: transform 0.25s ease, box-shadow 0.25s ease;
+  border-radius: 12px;
 }
 
 .movie-category-card:hover .movie-category-poster {
@@ -45,9 +42,16 @@
   box-shadow: 0 16px 32px rgba(0, 0, 0, 0.6);
 }
 
-/* Title under poster */
 .movie-category-title {
-  margin-top: 8px;
+  margin-top: 6px;
+  font-size: 13px;
   font-weight: 600;
-  font-size: 14px;
+  text-align: center;
+}
+
+@media (max-width: 600px) {
+  .movie-category-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px;
+  }
 }

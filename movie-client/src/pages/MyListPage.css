@@ -59,3 +59,15 @@
 .mylist-card .caption {
   text-align: center;
 }
+
+
+@media (max-width: 600px) {
+  .mylist-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 14px;
+  }
+
+  .mylist-card {
+    width: 100%;
+  }
+}

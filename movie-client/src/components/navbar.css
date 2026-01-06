@@ -194,10 +194,53 @@
 
 /* small screens: collapse search width */
 @media (max-width: 880px) {
-  .nav-search-input { width: 160px; max-width: 30vw; }
-  .nav-links { display: none; } /* hide Movies/TV on very small screens*/
+    .nav-links { display: none; } 
+  .nav-search-input { width: 100%; max-width: none; }
 }
 
+@media (max-width: 768px) {
+ .nav-inner {
+    padding: 10px 12px;
+  }
+
+  .nav-left {
+    gap: 12px;
+  }
+
+  /* Hide desktop links and desktop search */
+  .nav-links-desktop { display: none; }
+  .nav-search-desktop { display: none; }
+
+  /* Show mobile icons */
+  .nav-search-mobile-btn { display: inline-flex; }
+  .nav-hamburger-icon { display: inline-flex; }
+
+  /* Keep right side compact */
+  .nav-right {
+    gap: 10px;
+  }
+
+  /* Mobile search dropdown positioning */
+  .nav-search-mobile {
+    display: flex;
+    position: fixed;       /* better than absolute so it doesn't shift */
+    top: 64px;
+    left: 12px;
+    right: 12px;
+    z-index: 3000;
+  }
+
+  .nav-search-mobile .nav-search-input {
+    width: 100%;
+    font-size: 16px;
+  }
+}
+
+@media (max-width: 420px) {
+  .nav-logo-text{
+    display:none
+  }
+}
 /* Autocomplete dropdown */
 .nav-search-form { position: relative; }
 
@@ -258,4 +301,195 @@
 @media (max-width: 720px) {
   .suggestions { right: 0; left: 6px; width: calc(100% - 12px); max-width: none; }
   .sugg-thumb { display: none; }
+}
+
+
+
+/* Desktop by default */
+.nav-search-desktop { display: flex; }
+.nav-search-mobile-btn { display: none; }
+.nav-search-mobile { display: none; }
+
+/* Mobile: hide desktop search, show mobile search icon */
+@media (max-width: 768px) {
+  .nav-search-desktop { display: none; }
+  .nav-search-mobile-btn { display: inline-flex; }
+  .nav-search-mobile { 
+    display: flex; 
+    position: absolute;
+    top: 64px;           
+    left: 12px;
+    right: 12px;
+    z-index: 3000;
+  }
+}
+
+.nav-drawer.open{ transform: translateX(0); }
+
+.nav-drawer-top{
+  display: flex;
+  justify-content: flex-end;
+}
+
+.nav-drawer-close{
+  background: transparent;
+  border: none;
+  color: #fff;
+  font-size: 22px;
+  cursor: pointer;
+}
+
+.nav-drawer-links{
+  display: flex;
+  flex-direction: column;
+  margin-top: 16px;
+}
+
+.nav-drawer-links a{
+  color: #fff;
+  text-decoration: none;
+  font-size: 18px;
+  font-weight: 700;
+  padding: 12px 10px;
+  border-radius: 12px;
+}
+
+.nav-drawer-links a:hover{
+  background: rgba(255,255,255,0.06);
+}
+
+
+/* Hamburger + icon buttons */
+.nav-icon-btn{
+  background: transparent;
+  border: none;
+  color: #fff;
+  cursor: pointer;
+  font-size: 22px;
+  padding: 6px 10px;
+  border-radius: 10px;
+}
+
+/* Hide hamburger by default (desktop) */
+.nav-hamburger-icon { display: none; }
+
+/* Backdrop behind drawer */
+.nav-backdrop{
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.55);
+  z-index: 3500;
+}
+
+/* Drawer */
+.nav-drawer{
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100vh;
+  width: min(320px, 82vw);
+  background: rgba(10,10,12,0.98);
+  backdrop-filter: blur(8px);
+  transform: translateX(-110%);
+  transition: transform 0.25s ease;
+  z-index: 4000;
+  padding: 18px;
+}
+
+@media (max-width: 768px) {
+  .nav-user {
+    display: none;
+  }
+}
+
+
+/* Icon button base */
+.nav-icon-btn{
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  color: #fff;
+  cursor: pointer;
+  padding: 8px 10px;
+  border-radius: 999px;
+  line-height: 1;
+}
+
+/* Hamburger hidden on desktop */
+.nav-hamburger-icon{
+  display: none;
+  font-size: 22px;
+}
+
+/* Search icon hidden on desktop */
+.nav-search-mobile-btn{
+  display: none;
+}
+
+/* Mobile: show hamburger + search icon */
+@media (max-width: 768px){
+  .nav-hamburger-icon{ display: inline-flex; }
+  .nav-search-mobile-btn{ display: inline-flex; }
+}
+
+
+/* ----- Mobile navbar fit for logged-out state ----- */
+@media (max-width: 768px) {
+  /* keep left + right on one row */
+  .nav-left,
+  .nav-right {
+    width: auto;
+    flex: 0 0 auto;
+  }
+
+  /* keep everything aligned */
+  .nav-inner {
+    flex-wrap: nowrap;
+    align-items: center;
+    gap: 10px;
+  }
+
+ 
+
+  /* make right side items a tight cluster */
+  .nav-right {
+    margin-left: auto;
+    gap: 8px;
+  }
+
+  /* auth links become small pill buttons */
+  .nav-actions {
+    gap: 6px;
+  }
+
+  .nav-auth-link {
+    padding: 6px 10px;
+    font-size: 13px;
+    line-height: 1;
+    border-radius: 999px;
+    background: rgba(255,255,255,0.10);
+    white-space: nowrap;
+  }
+
+  .nav-auth-link:hover {
+    background: rgba(255,255,255,0.16);
+  }
+
+  
+  .nav-auth-link:last-child {
+    background: rgba(7, 218, 18, 0.85);
+    color: #000;
+    font-weight: 800;
+  }
+
+  /* keep icons from taking huge space */
+  .nav-icon-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 6px;
+    border-radius: 999px;
+  }
 }
